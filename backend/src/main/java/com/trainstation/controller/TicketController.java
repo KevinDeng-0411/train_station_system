@@ -1,6 +1,7 @@
 package com.trainstation.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.trainstation.dto.TicketDetailDto;
 import com.trainstation.entity.Ticket;
 import com.trainstation.entity.RefundRecord;
 import com.trainstation.service.TicketService;
@@ -24,7 +25,7 @@ public class TicketController {
             @RequestParam(required = false) Long trainId,
             @RequestParam(required = false) Long salespersonId) {
         Map<String, Object> result = new HashMap<>();
-        Page<Ticket> page = ticketService.getTicketPage(pageNum, pageSize, trainId, salespersonId);
+        Page<TicketDetailDto> page = ticketService.getTicketPage(pageNum, pageSize, trainId, salespersonId);
         result.put("success", true);
         result.put("data", page.getRecords());
         result.put("total", page.getTotal());

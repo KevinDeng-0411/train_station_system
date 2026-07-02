@@ -2,9 +2,11 @@ package com.trainstation.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.trainstation.dto.TicketDetailDto;
 import com.trainstation.entity.Ticket;
 import com.trainstation.entity.Train;
 import com.trainstation.entity.RefundRecord;
+import com.trainstation.mapper.TicketDetailMapper;
 import com.trainstation.mapper.TicketMapper;
 import com.trainstation.mapper.RefundRecordMapper;
 import com.trainstation.mapper.TrainMapper;
@@ -13,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -23,14 +24,17 @@ public class TicketServiceImpl implements TicketService {
     private TicketMapper ticketMapper;
 
     @Autowired
+    private TicketDetailMapper ticketDetailMapper;
+
+    @Autowired
     private TrainMapper trainMapper;
 
     @Autowired
     private RefundRecordMapper refundRecordMapper;
 
     @Override
-    public Page<Ticket> getTicketPage(int pageNum, int pageSize, Long trainId, Long salespersonId) {
-        Page<Ticket> page = new Page<>(pageNum, pageSize);
+    public Page<TicketDetailDto> getTicketPage(int pageNum, int pageSize, Long trainId, Long salespersonId) {
+        Page<TicketDetailDto> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Ticket> wrapper = new LambdaQueryWrapper<>();
         if (trainId != null) {
             wrapper.eq(Ticket::getTrainId, trainId);
@@ -39,7 +43,7 @@ public class TicketServiceImpl implements TicketService {
             wrapper.eq(Ticket::getSalespersonId, salespersonId);
         }
         wrapper.orderByDesc(Ticket::getSaleTime);
-        return ticketMapper.selectPage(page, wrapper);
+        return ticketDetailMapper.selectTicketPage(page, wrapper);
     }
 
     @Override
@@ -77,7 +81,7 @@ public class TicketServiceImpl implements TicketService {
         // 4. 插入售票记录
         ticketMapper.insert(ticket);
 
-        // 5. 减少余票（通过触发器也会自动减少，这里应用层也做一次确保一致）
+        // 5. 减少余票
         train.setRemainingSeats(train.getRemainingSeats() - 1);
         trainMapper.updateById(train);
 
@@ -87,7 +91,6 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional
     public RefundRecord refundTicket(Long ticketId, Long operatorId, String reason) {
-        // 1. 检查车票是否存在
         Ticket ticket = ticketMapper.selectById(ticketId);
         if (ticket == null) {
             throw new RuntimeException("车票不存在");
@@ -96,18 +99,15 @@ public class TicketServiceImpl implements TicketService {
             throw new RuntimeException("该车票已退票");
         }
 
-        // 2. 更新车票状态
         ticket.setStatus(0);
         ticketMapper.updateById(ticket);
 
-        // 3. 恢复余票
         Train train = trainMapper.selectById(ticket.getTrainId());
         if (train != null && train.getRemainingSeats() < train.getTotalSeats()) {
             train.setRemainingSeats(train.getRemainingSeats() + 1);
             trainMapper.updateById(train);
         }
 
-        // 4. 创建退票记录
         RefundRecord refundRecord = new RefundRecord();
         refundRecord.setTicketId(ticketId);
         refundRecord.setRefundAmount(ticket.getPrice());

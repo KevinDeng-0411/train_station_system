@@ -24,10 +24,26 @@
       <h3>有效车票列表</h3>
       <el-table :data="ticketList" border stripe>
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="trainNumber" label="车次" width="100" />
+        <el-table-column label="车次" width="120">
+          <template #default="{ row }">
+            <el-tag type="info" effect="plain" round>{{ row.trainNumber || 'N/A' }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="出发→到达" min-width="180">
+          <template #default="{ row }">
+            <span>{{ row.departureStationName || 'N/A' }}</span>
+            <span style="color: #0891B2; margin: 0 6px;">→</span>
+            <span>{{ row.arrivalStationName || 'N/A' }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="seatNumber" label="座位" width="80" />
         <el-table-column prop="passengerName" label="乘客" width="100" />
-        <el-table-column prop="price" label="票价" width="100" />
+        <el-table-column prop="salespersonName" label="售票员" width="100" />
+        <el-table-column prop="price" label="票价" width="100">
+          <template #default="{ row }">
+            <span style="font-weight: 600; color: #0891B2;">¥{{ row.price }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="saleDate" label="乘车日期" width="120" />
       </el-table>
     </el-card>
