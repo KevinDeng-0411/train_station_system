@@ -31,6 +31,9 @@ services:
       dockerfile: Dockerfile
     container_name: train_backend
     environment:
+      SPRING_DATASOURCE_HOST: mysql
+      SPRING_DATASOURCE_PORT: 3306
+      SPRING_DATASOURCE_DATABASE: train_station_db
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/train_station_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root123456

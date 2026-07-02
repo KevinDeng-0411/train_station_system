@@ -2,6 +2,7 @@ package com.trainstation.controller;
 
 import com.trainstation.entity.Station;
 import com.trainstation.service.StationService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +34,7 @@ public class StationController {
     }
 
     @PostMapping
-    public Map<String, Object> createStation(@RequestBody Station station) {
+    public Map<String, Object> createStation(@Valid @RequestBody Station station) {
         Map<String, Object> result = new HashMap<>();
         boolean success = stationService.saveStation(station);
         result.put("success", success);
@@ -42,7 +43,7 @@ public class StationController {
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> updateStation(@PathVariable Long id, @RequestBody Station station) {
+    public Map<String, Object> updateStation(@PathVariable Long id, @Valid @RequestBody Station station) {
         Map<String, Object> result = new HashMap<>();
         station.setId(id);
         boolean success = stationService.updateStation(station);

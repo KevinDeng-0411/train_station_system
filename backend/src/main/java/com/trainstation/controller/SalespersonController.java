@@ -3,6 +3,7 @@ package com.trainstation.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.trainstation.entity.Salesperson;
 import com.trainstation.service.SalespersonService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +48,7 @@ public class SalespersonController {
     }
 
     @PostMapping
-    public Map<String, Object> createSalesperson(@RequestBody Salesperson salesperson) {
+    public Map<String, Object> createSalesperson(@Valid @RequestBody Salesperson salesperson) {
         Map<String, Object> result = new HashMap<>();
         boolean success = salespersonService.saveSalesperson(salesperson);
         result.put("success", success);
@@ -56,7 +57,7 @@ public class SalespersonController {
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> updateSalesperson(@PathVariable Long id, @RequestBody Salesperson salesperson) {
+    public Map<String, Object> updateSalesperson(@PathVariable Long id, @Valid @RequestBody Salesperson salesperson) {
         Map<String, Object> result = new HashMap<>();
         salesperson.setId(id);
         boolean success = salespersonService.updateSalesperson(salesperson);

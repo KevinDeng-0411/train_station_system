@@ -3,6 +3,7 @@ package com.trainstation.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.trainstation.entity.Train;
 import com.trainstation.service.TrainService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +50,7 @@ public class TrainController {
     }
 
     @PostMapping
-    public Map<String, Object> createTrain(@RequestBody Train train) {
+    public Map<String, Object> createTrain(@Valid @RequestBody Train train) {
         Map<String, Object> result = new HashMap<>();
         boolean success = trainService.saveTrain(train);
         result.put("success", success);
@@ -58,7 +59,7 @@ public class TrainController {
     }
 
     @PutMapping("/{id}")
-    public Map<String, Object> updateTrain(@PathVariable Long id, @RequestBody Train train) {
+    public Map<String, Object> updateTrain(@PathVariable Long id, @Valid @RequestBody Train train) {
         Map<String, Object> result = new HashMap<>();
         train.setId(id);
         boolean success = trainService.updateTrain(train);

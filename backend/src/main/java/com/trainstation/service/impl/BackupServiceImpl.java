@@ -36,9 +36,10 @@ public class BackupServiceImpl implements BackupService {
             }
 
             // 执行mysqldump备份
+            String dbHost = System.getenv().getOrDefault("SPRING_DATASOURCE_HOST", "localhost");
             String[] command = {
                 "mysqldump",
-                "-h" + "localhost",
+                "-h" + dbHost,
                 "-uroot",
                 "-proot123456",
                 "--single-transaction",
@@ -94,9 +95,10 @@ public class BackupServiceImpl implements BackupService {
         }
 
         try {
+            String dbHost = System.getenv().getOrDefault("SPRING_DATASOURCE_HOST", "localhost");
             String[] command = {
                 "mysql",
-                "-h" + "localhost",
+                "-h" + dbHost,
                 "-uroot",
                 "-proot123456",
                 "train_station_db"
