@@ -46,7 +46,12 @@ export const ticketApi = {
 // 统计报表
 export const statisticsApi = {
   getTrainSales: (trainNumber, date) => api.get(`/statistics/trains/${trainNumber}/date/${date}`),
-  getSalespersonRevenue: (date) => api.get(`/statistics/salespeople/date/${date}`)
+  getSalespersonRevenue: (date) => api.get(`/statistics/salespeople/date/${date}`),
+  // 仪表盘新增
+  getKpi: () => api.get('/statistics/kpi'),
+  getTrend: () => api.get('/statistics/trend'),
+  getTrainTop: (limit = 10) => api.get('/statistics/train-top', { params: { limit } }),
+  getStationPopular: (type = 'departure', limit = 8) => api.get('/statistics/station-popular', { params: { type, limit } })
 }
 
 // 备份恢复

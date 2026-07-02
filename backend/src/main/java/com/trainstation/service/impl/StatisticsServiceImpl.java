@@ -8,10 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
@@ -46,6 +45,123 @@ public class StatisticsServiceImpl implements StatisticsService {
             return new ArrayList<>();
         };
         return jdbcTemplate.execute(sql, callback);
+    }
+
+    // ========== 仪表盘新增 ==========
+
+    @Override
+    public Map<String, Object> getKpi() {
+        Map<String, Object> kpi = new HashMap<>();
+
+        // 今日售票数
+        Long todayTickets = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM tickets WHERE DATE(sale_time) = CURDATE() AND status = 1",
+            Long.class
+        );
+        kpi.put("todayTickets", todayTickets == null ? 0 : todayTickets);
+
+        // 今日收入
+        Double todayRevenue = jdbcTemplate.queryForObject(
+            "SELECT COALESCE(SUM(price), 0) FROM tickets WHERE DATE(sale_time) = CURDATE() AND status = 1",
+            Double.class
+        );
+        kpi.put("todayRevenue", todayRevenue == null ? 0 : todayRevenue);
+
+        // 总收入
+        Double totalRevenue = jdbcTemplate.queryForObject(
+            "SELECT COALESCE(SUM(price), 0) FROM tickets WHERE status = 1",
+            Double.class
+        );
+        kpi.put("totalRevenue", totalRevenue == null ? 0 : totalRevenue);
+
+        // 在售车次
+        Long activeTrains = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM trains WHERE status = 1",
+            Long.class
+        );
+        kpi.put("activeTrains", activeTrains == null ? 0 : activeTrains);
+
+        // 在职业务员
+        Long activeSalespeople = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM salespeople WHERE status = 1",
+            Long.class
+        );
+        kpi.put("activeSalespeople", activeSalespeople == null ? 0 : activeSalespeople);
+
+        // 票务总数（已售出，含已退）
+        Long totalTickets = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM tickets",
+            Long.class
+        );
+        kpi.put("totalTickets", totalTickets == null ? 0 : totalTickets);
+
+        return kpi;
+    }
+
+    @Override
+    public Map<String, Object> get7DayTrend() {
+        Map<String, Object> result = new HashMap<>();
+        List<String> dates = new ArrayList<>();
+        List<Long> ticketCounts = new ArrayList<>();
+        List<Double> revenues = new ArrayList<>();
+
+        // 生成最近7天日期（包括今天）
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate today = LocalDate.now();
+        for (int i = 6; i >= 0; i--) {
+            dates.add(today.minusDays(i).format(formatter));
+        }
+
+        // 一次查询获取所有数据
+        String sql = "SELECT DATE(sale_time) AS d, COUNT(*) AS cnt, COALESCE(SUM(price), 0) AS rev " +
+                     "FROM tickets WHERE status = 1 AND sale_time >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) " +
+                     "GROUP BY DATE(sale_time)";
+        Map<String, double[]> dayMap = new HashMap<>();
+        try {
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
+            for (Map<String, Object> row : rows) {
+                Object dObj = row.get("d");
+                if (dObj != null) {
+                    String d = dObj.toString();
+                    double cnt = ((Number) row.get("cnt")).doubleValue();
+                    double rev = ((Number) row.get("rev")).doubleValue();
+                    dayMap.put(d, new double[]{cnt, rev});
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // 填充数组，缺失的日期补0
+        for (String d : dates) {
+            double[] v = dayMap.getOrDefault(d, new double[]{0, 0});
+            ticketCounts.add((long) v[0]);
+            revenues.add(v[1]);
+        }
+
+        result.put("dates", dates);
+        result.put("ticketCounts", ticketCounts);
+        result.put("revenues", revenues);
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> getTrainTopRevenue(int limit) {
+        String sql = "SELECT t.train_number, COUNT(tk.id) AS ticket_count, " +
+                     "COALESCE(SUM(tk.price), 0) AS total_revenue " +
+                     "FROM trains t LEFT JOIN tickets tk ON t.id = tk.train_id AND tk.status = 1 " +
+                     "GROUP BY t.id, t.train_number " +
+                     "ORDER BY total_revenue DESC LIMIT ?";
+        return jdbcTemplate.queryForList(sql, limit);
+    }
+
+    @Override
+    public List<Map<String, Object>> getStationPopularity(String type, int limit) {
+        String column = "departure".equals(type) ? "departure_station_id" : "arrival_station_id";
+        String sql = "SELECT s.station_name, COUNT(tk.id) AS ticket_count " +
+                     "FROM tickets tk JOIN stations s ON tk." + column + " = s.id " +
+                     "WHERE tk.status = 1 " +
+                     "GROUP BY s.id, s.station_name " +
+                     "ORDER BY ticket_count DESC LIMIT ?";
+        return jdbcTemplate.queryForList(sql, limit);
     }
 
     private List<Map<String, Object>> resultSetToList(ResultSet rs) throws SQLException {

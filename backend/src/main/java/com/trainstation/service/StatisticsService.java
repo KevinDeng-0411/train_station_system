@@ -6,4 +6,10 @@ import java.util.Map;
 public interface StatisticsService {
     List<Map<String, Object>> getTrainSalesStatistics(String trainNumber, String saleDate);
     List<Map<String, Object>> getSalespersonRevenue(String date);
+
+    // 仪表盘新增接口
+    Map<String, Object> getKpi();
+    Map<String, Object> get7DayTrend();
+    List<Map<String, Object>> getTrainTopRevenue(int limit);
+    List<Map<String, Object>> getStationPopularity(String type, int limit);
 }
