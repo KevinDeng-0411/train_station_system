@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    container_name: train_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: train_station_db
+      MYSQL_USER: trainuser
+      MYSQL_PASSWORD: train123456
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - train_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: train_backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/train_station_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root123456
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./mysql/backups:/backups
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - train_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: train_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - train_network
+
+networks:
+  train_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
