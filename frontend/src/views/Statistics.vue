@@ -17,12 +17,20 @@
             </el-form-item>
           </el-form>
           <el-table :data="trainStats" border stripe v-loading="trainLoading">
-            <el-table-column prop="trainNumber" label="车次" width="100" />
-            <el-table-column prop="departureStation" label="出发站" width="120" />
-            <el-table-column prop="arrivalStation" label="到达站" width="120" />
-            <el-table-column prop="ticketCount" label="售票数" width="100" />
-            <el-table-column prop="totalAmount" label="收入" width="120" />
-            <el-table-column prop="remainingSeats" label="余票" width="100" />
+            <el-table-column prop="train_number" label="车次" width="100" />
+            <el-table-column prop="departure_station" label="出发站" width="120" />
+            <el-table-column prop="arrival_station" label="到达站" width="120" />
+            <el-table-column prop="ticket_count" label="售票数" width="100" />
+            <el-table-column label="收入" width="120">
+              <template #default="{ row }">
+                <span style="font-weight:600;color:#0891B2">¥{{ row.total_amount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="remaining_seats" label="余票" width="100">
+              <template #default="{ row }">
+                <el-tag :type="row.remaining_seats > 10 ? 'success' : 'danger'">{{ row.remaining_seats }}</el-tag>
+              </template>
+            </el-table-column>
           </el-table>
         </el-card>
       </el-col>
@@ -38,10 +46,14 @@
             </el-form-item>
           </el-form>
           <el-table :data="salespersonStats" border stripe v-loading="salespersonLoading">
-            <el-table-column prop="employeeCode" label="工号" width="120" />
-            <el-table-column prop="salespersonName" label="姓名" width="120" />
-            <el-table-column prop="ticketCount" label="售票数" width="100" />
-            <el-table-column prop="totalRevenue" label="销售收入" width="120" />
+            <el-table-column prop="employee_code" label="工号" width="120" />
+            <el-table-column prop="salesperson_name" label="姓名" width="120" />
+            <el-table-column prop="ticket_count" label="售票数" width="100" />
+            <el-table-column label="销售收入" width="120">
+              <template #default="{ row }">
+                <span style="font-weight:600;color:#0891B2">¥{{ row.total_revenue }}</span>
+              </template>
+            </el-table-column>
           </el-table>
         </el-card>
       </el-col>
