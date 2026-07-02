@@ -11,17 +11,20 @@
 <script setup>
 import { computed } from 'vue'
 import VChart from 'vue-echarts'
-import { cyanBluePalette, commonTooltip } from '@/utils/chartTheme'
+import { cyanBluePalette, formatItemTooltip } from '@/utils/chartTheme'
 
 const props = defineProps({
-  data: { type: Array, default: () => [] }  // [{station_name, ticket_count}]
+  data: { type: Array, default: () => [] }
 })
 
 const option = computed(() => ({
   tooltip: {
-    ...commonTooltip,
     trigger: 'item',
-    formatter: '{b}: {c} 张 ({d}%)'
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+    borderWidth: 0,
+    padding: 0,
+    extraCssText: 'box-shadow: 0 6px 24px rgba(15, 23, 42, 0.12); border-radius: 12px; backdrop-filter: blur(6px);',
+    formatter: (params) => formatItemTooltip(params, 'count')
   },
   legend: {
     type: 'scroll',

@@ -13,11 +13,11 @@ import { computed } from 'vue'
 import VChart from 'vue-echarts'
 import {
   commonGrid,
-  commonTooltip,
   commonLegend,
   cyanBluePalette,
   axisLabelStyle,
-  splitLineStyle
+  splitLineStyle,
+  formatAxisTooltip
 } from '@/utils/chartTheme'
 
 const props = defineProps({
@@ -28,7 +28,15 @@ const props = defineProps({
 
 const option = computed(() => ({
   grid: { ...commonGrid, top: 60 },
-  tooltip: { ...commonTooltip, axisPointer: { type: 'cross', lineStyle: { color: cyanBluePalette[0] } } },
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+    borderWidth: 0,
+    padding: 0,
+    extraCssText: 'box-shadow: 0 6px 24px rgba(15, 23, 42, 0.12); border-radius: 12px; backdrop-filter: blur(6px);',
+    axisPointer: { type: 'cross', lineStyle: { color: '#67E8F9', type: 'dashed' } },
+    formatter: (params) => formatAxisTooltip(params, 'count')
+  },
   legend: { ...commonLegend, data: ['售票数', '收入(元)'] },
   xAxis: {
     type: 'category',
