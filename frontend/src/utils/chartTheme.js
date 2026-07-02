@@ -11,7 +11,7 @@ export const cyanBluePalette = [
   '#164E63'   // 藏青
 ]
 
-export const gradientColor = new echarts ? null : null // placeholder
+export const gradientColor = null
 export const cyanGradient = ['#0891B2', '#67E8F9']
 
 export const commonGrid = { left: 50, right: 30, top: 50, bottom: 40, containLabel: true }
