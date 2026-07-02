@@ -59,8 +59,7 @@ services:
     networks:
       - train_network
 
-  # 轻量级数据库可视化管理工具
-  # Adminer - 取代phpMyAdmin的轻量替代品（单PHP文件）
+  # 数据库可视化管理工具（轻量级，单PHP文件）
   adminer:
     image: adminer:latest
     container_name: train_adminer
@@ -71,6 +70,45 @@ services:
       ADMINER_DEFAULT_SERVER: mysql
       ADMINER_DESIGN: '2'
       ADMINER_PLUGINS: 'tables-filter'
+    depends_on:
+      - mysql
+    networks:
+      - train_network
+
+  # phpMyAdmin - 自带 Designer 交互式 ER 图工具
+  # 端口: 8082
+  # 包含完整的数据库浏览器 + 可拖拽的ER图设计器
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: train_phpmyadmin
+    restart: always
+    ports:
+      - "8082:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    depends_on:
+      - mysql
+    networks:
+      - train_network
+
+  # SchemaSpy - 自动生成 ER 图报告
+  # 输出到 docs/erd/ 目录，可下载 index.html 在浏览器打开
+  schemaspy:
+    image: schemaspy/schemaspy:latest
+    container_name: train_schemaspy
+    volumes:
+      - ./docs/erd:/output
+    command: >
+      -t mysql
+      -host mysql:3306
+      -db train_station_db
+      -s train_station_db
+      -u root
+      -p root123456
+      -norowprogress
+      -cat '%'
     depends_on:
       - mysql
     networks:
