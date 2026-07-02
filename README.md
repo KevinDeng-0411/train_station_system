@@ -6,6 +6,7 @@
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen?logo=springboot)
 ![Vue](https://img.shields.io/badge/Vue-3.4-42b883?logo=vuedotjs)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql)
+![ECharts](https://img.shields.io/badge/ECharts-5.5-orange?logo=apacheecharts)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
@@ -16,17 +17,35 @@
 ### ✨ 项目亮点
 
 - 🎨 **现代化UI设计** - 玻璃态(Glassmorphism)界面 + 青蓝渐变主题
-- 📊 **完整的数据库设计** - 严格遵循第三范式(3NF)，并提供设计文档
-- 🐳 **一键Docker部署** - 无需本地安装MySQL/Java/Node.js
+- 📊 **商业仪表盘** - 4个KPI卡片 + 4个ECharts图表（折线、饼图、柱状、玫瑰）
+- 📐 **完整3NF数据库设计** - 严格遵循第三范式，详细说明见 [DATABASE_DESIGN.md](DATABASE_DESIGN.md)
+- 🐳 **一键Docker部署** - 含4个工具（MySQL + 后端 + 前端 + phpMyAdmin + SchemaSpy）
 - 🔒 **业务规则自动化** - 触发器自动维护座位数，确保数据一致性
 - 📈 **存储过程统计分析** - 支持车次售票和业务员收入统计
 - 💾 **数据备份恢复** - 一键创建备份，按需恢复
 
 ---
 
+## 🌐 服务总览
+
+启动后打开 **http://localhost** 即可使用。所有服务端口：
+
+| 服务 | 地址 | 凭据 | 用途 |
+|------|------|------|------|
+| 🚂 **主应用** | **http://localhost** | - | 火车站票务系统前端 |
+| 📡 后端API | http://localhost:8080/api | - | REST 接口 |
+| 🗄 MySQL | localhost:3306 | `root` / `root123456` | 数据库 |
+| 🔥 **phpMyAdmin** | **http://localhost:8082** | 容器间用 `mysql` 作主机 | ⭐ 数据浏览 + **交互式ER图Designer** |
+| 📋 Adminer | http://localhost:8081 | 同上 | 轻量级数据库浏览 |
+| 📊 SchemaSpy 报告 | `docs/erd/index.html` | - | 自动生成的ER图报告 |
+
+> 💡 **关键**：在phpMyAdmin / Adminer 登录时，**服务器字段填 `mysql`**（容器名），不是 `localhost`！
+
+---
+
 ## 🎯 功能特性
 
-### 1. 车次管理
+### 1. 车次管理 🚆
 - ✅ 车次的增删改查
 - ✅ 车次号、出发/到达城市、发车时间管理
 - ✅ 总座位数与余票实时显示
@@ -39,9 +58,9 @@
 ### 3. 业务员管理
 - ✅ 业务员档案（工号、姓名、联系方式）
 - ✅ 在职/离职状态管理
-- ✅ 添加自动填充创建时间
+- ✅ 自动填充创建时间（MetaObjectHandler）
 
-### 4. 车票销售 🚄
+### 4. 车票销售 🎫
 - ✅ 智能选车次、站点、座位
 - ✅ **触发器自动检查余票**（防止超员）
 - ✅ **触发器自动减少座位数**
@@ -54,9 +73,14 @@
 - ✅ 自动生成退款记录
 - ✅ 记录退票原因与操作员
 
-### 6. 存储过程统计 📊
-- ✅ **sp_train_sales_statistics** - 指定车次指定日期售票情况
-- ✅ **sp_salesperson_revenue** - 业务员销售收入统计
+### 6. 统计报表 📊（**商业仪表盘风格**）
+- ✅ **4个KPI卡片** - 今日售票 / 今日收入 / 累计收入 / 在售车次
+- ✅ **最近7天售票趋势折线图** - 双轴（售票数 + 收入）
+- ✅ **业务员收入占比饼图** - 环形图
+- ✅ **车次收入TOP10柱状图** - 水平渐变柱
+- ✅ **出发站热门玫瑰图** - 南丁格尔玫瑰图
+- ✅ 现有表格：车次售票明细 + 业务员收入排行（带金银铜排名徽章）
+- ✅ 富文本Tooltip：玻璃态阴影 + 色块 + 图标 + 完整数据展示
 
 ### 7. 数据备份与恢复 💾
 - ✅ 完整数据库备份（mysqldump）
@@ -83,6 +107,8 @@
 | Vue | 3.4 | 前端框架 |
 | Vite | 5.0 | 构建工具 |
 | Element Plus | 2.5 | UI组件库 |
+| **ECharts** | 5.5 | 数据可视化 |
+| **vue-echarts** | 7.0 | ECharts Vue集成 |
 | Pinia | 2.1 | 状态管理 |
 | Axios | 1.6 | HTTP客户端 |
 | Vue Router | 4.2 | 路由管理 |
@@ -90,7 +116,14 @@
 ### 数据库
 - MySQL 8.0
 - 字符集：utf8mb4 / utf8mb4_unicode_ci
-- 7张表，2个触发器，3个存储过程
+- 7张业务表，2个触发器，3个存储过程
+
+### 工具链（Docker化）
+| 工具 | 端口 | 用途 |
+|------|------|------|
+| phpMyAdmin | 8082 | 数据浏览 + 交互式ER图（Designer功能） |
+| Adminer | 8081 | 单PHP文件轻量数据库管理 |
+| SchemaSpy | - | 自动生成ER图报告 |
 
 ### 部署
 - Docker / Docker Compose
@@ -101,7 +134,7 @@
 ## 🚀 快速开始
 
 ### 前置要求
-只需要安装一个：**Docker Desktop** (或 Docker + Docker Compose)
+只需要安装一个：**Docker Desktop**
 - [Mac](https://docs.docker.com/desktop/install/mac-install/)
 - [Windows](https://docs.docker.com/desktop/install/windows-install/)
 - [Linux](https://docs.docker.com/desktop/install/linux-install/)
@@ -112,24 +145,38 @@
 # 1. 进入项目目录
 cd train-station-system
 
-# 2. 一键启动所有服务
+# 2. 一键启动所有服务（含5个Docker容器）
 docker-compose up -d --build
 
 # 3. 查看服务状态
 docker-compose ps
 
-# 4. 访问应用
-# 前端: http://localhost
-# 后端API: http://localhost:8080/api
-# MySQL: localhost:3306
+# 4. 等待所有容器变为 healthy（约1-2分钟）
+# train_mysql       healthy
+# train_backend     Up
+# train_frontend    Up
+# train_adminer     Up
+# train_phpmyadmin  Up
 ```
 
 首次启动需要 3-5 分钟（下载Maven依赖和npm包）。
 
+### 立即访问
+
+打开浏览器访问：
+
+| 用途 | 地址 |
+|------|------|
+| 🚂 **使用系统** | **http://localhost** |
+| 🔍 **查看E-R图（推荐）** | **http://localhost:8082** (phpMyAdmin Designer) |
+| 📊 浏览ER报告 | 打开 `docs/erd/index.html` |
+| 📋 快速数据浏览 | http://localhost:8081 (Adminer) |
+
 ### 停止服务
+
 ```bash
 docker-compose down            # 停止容器
-docker-compose down -v         # 停止并清理数据卷
+docker-compose down -v         # 停止并清理数据卷（重置数据）
 ```
 
 ---
@@ -138,8 +185,9 @@ docker-compose down -v         # 停止并清理数据卷
 
 ```
 train-station-system/
-├── docker-compose.yml              # Docker容器编排
+├── docker-compose.yml              # 容器编排（6个服务）
 ├── README.md                       # 本文件
+├── DATABASE_DESIGN.md              # 数据库设计说明文档（验收用）
 ├── .gitignore                      # Git忽略配置
 │
 ├── mysql/                          # MySQL数据初始化
@@ -152,11 +200,10 @@ train-station-system/
 │
 ├── backend/                        # Spring Boot后端
 │   ├── Dockerfile
-│   ├── pom.xml                     # Maven依赖
+│   ├── pom.xml
 │   └── src/main/
 │       ├── java/com/trainstation/
-│       │   ├── TrainStationApplication.java
-│       │   ├── config/             # 配置类（含MetaObjectHandler）
+│       │   ├── config/             # 配置类（含MetaObjectHandler自动填充）
 │       │   ├── controller/         # 7个REST控制器
 │       │   ├── service/            # 业务逻辑层
 │       │   ├── mapper/             # 数据访问层（含JOIN查询）
@@ -166,17 +213,22 @@ train-station-system/
 │       └── resources/
 │           └── application.yml
 │
-└── frontend/                       # Vue 3前端
-    ├── Dockerfile
-    ├── nginx.conf
-    ├── package.json
-    ├── vite.config.js
-    └── src/
-        ├── main.js
-        ├── App.vue                # 全局布局（玻璃态导航）
-        ├── api/                   # API封装
-        ├── router/                # 路由配置
-        └── views/                 # 7个页面
+├── frontend/                       # Vue 3前端
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── package.json                 # echarts + vue-echarts 依赖
+│   ├── vite.config.js
+│   └── src/
+│       ├── main.js                 # ECharts按需引入
+│       ├── App.vue                  # 全局玻璃态导航
+│       ├── api/index.js             # Axios封装
+│       ├── router/
+│       ├── views/                   # 7个页面（含仪表盘）
+│       ├── components/chart/        # 4个ECharts图表组件
+│       └── utils/chartTheme.js      # 统一ECharts主题
+│
+└── docs/erd/                        # SchemaSpy自动生成（.gitignore）
+    └── index.html                    # ER图报告
 ```
 
 ---
@@ -209,19 +261,17 @@ trains ─────┐
 | `refund_records` | 退票记录 | ticket_id, refund_amount, reason |
 | `backup_records` | 备份历史 | backup_file, status |
 
-### 范式分析
+### 范式分析（全部满足3NF）
 
-设计严格遵循3NF：
+| 表 | 候选键 | 范式 |
+|----|--------|------|
+| trains | train_number | 3NF ✅ |
+| stations | station_name | 3NF ✅ |
+| train_stations | (train_id, station_id) | 3NF ✅ |
+| salespeople | employee_code | 3NF ✅ |
+| tickets | (train_id, sale_date, seat_number) | 3NF ✅ |
 
-| 表 | 候选键 | 函数依赖 | 范式 |
-|----|--------|----------|------|
-| trains | train_number | 无传递依赖 | 3NF ✅ |
-| stations | station_name | station_name → city | 3NF ✅ |
-| train_stations | (train_id, station_id) | 组合主键直接依赖 | 3NF ✅ |
-| salespeople | employee_code | 无传递依赖 | 3NF ✅ |
-| tickets | (train_id, sale_date, seat_number) | 完全函数依赖 | 3NF ✅ |
-
-详见 [mysql/init/01-schema.sql](mysql/init/01-schema.sql) 顶部注释的设计决策说明。
+**详细设计**：参考 [DATABASE_DESIGN.md](DATABASE_DESIGN.md)（包含函数依赖分析、设计决策理由）
 
 ### 触发器
 
@@ -260,10 +310,17 @@ GET    /api/tickets                  车票列表（关联查询）
 GET    /api/tickets/check-seat       检查座位可用性
 ```
 
-### 统计接口（调用存储过程）
+### 统计接口（**仪表盘版**）
 ```
+# 传统表格统计（存储过程）
 GET /api/statistics/trains/{trainNumber}/date/{date}    车次统计
 GET /api/statistics/salespeople/date/{date}            业务员统计
+
+# 新增仪表盘接口
+GET /api/statistics/kpi              顶部4个KPI卡片数据
+GET /api/statistics/trend             最近7天售票趋势
+GET /api/statistics/train-top?limit=10     车次收入TOP10
+GET /api/statistics/station-popular?type=departure&limit=8  站点热门排行
 ```
 
 ### 数据备份
@@ -286,6 +343,12 @@ DELETE /api/backup/{id}        删除备份
 - **实时时间**：JetBrains Mono字体显示秒级时间
 - **系统状态指示器**：绿色脉冲点
 
+### 仪表盘设计
+- **玻璃态卡片**：所有KPI和图表卡片采用 backdrop-filter blur
+- **ECharts主题**：统一的 cyanBluePalette 8色调色板
+- **富文本Tooltip**：色块 + 图标 + 完整数据展示（不再是 `{a}: {b}` 的朴素格式）
+- **响应式**：vue-echarts autoresize 自动适配窗口
+
 ### 交互动效
 - 路由切换 fade + slide 过渡
 - 按钮 hover 渐变提升
@@ -298,7 +361,7 @@ DELETE /api/backup/{id}        删除备份
 ## 🧪 功能测试
 
 ```bash
-# 车票销售测试
+# 售票测试
 curl -X POST http://localhost:8080/api/tickets/sale \
   -H "Content-Type: application/json" \
   -d '{"trainId":1,"departureStationId":1,"arrivalStationId":2,
@@ -306,10 +369,22 @@ curl -X POST http://localhost:8080/api/tickets/sale \
        "passengerName":"张三","passengerIdCard":"110101199001011234",
        "salespersonId":1}'
 
-# 车次统计
+# 仪表盘KPI
+curl http://localhost:8080/api/statistics/kpi
+
+# 7天趋势
+curl http://localhost:8080/api/statistics/trend
+
+# 车次收入TOP10
+curl "http://localhost:8080/api/statistics/train-top?limit=10"
+
+# 出发站热门
+curl "http://localhost:8080/api/statistics/station-popular?type=departure&limit=8"
+
+# 车次统计（存储过程）
 curl http://localhost:8080/api/statistics/trains/G101/date/2026-07-02
 
-# 业务员统计
+# 业务员统计（存储过程）
 curl http://localhost:8080/api/statistics/salespeople/date/2026-07-02
 ```
 
@@ -322,7 +397,45 @@ curl http://localhost:8080/api/statistics/salespeople/date/2026-07-02
 3. **存储过程封装业务** - 复杂统计查询在数据库层完成
 4. **完整的备份恢复机制** - 生产级数据安全保障
 5. **现代前端设计** - Glassmorphism风格，区分常见模板化UI
-6. **Docker容器化** - 工程化交付，一键启动
+6. **可视化统计仪表盘** - 4 KPI + 4图表，体现数据分析能力
+7. **Docker容器化** - 工程化交付，含数据库可视化管理工具
+8. **完整文档** - README + DATABASE_DESIGN 双重验收支持
+
+---
+
+## 📚 相关文档
+
+- 📘 [DATABASE_DESIGN.md](DATABASE_DESIGN.md) - 数据库设计说明书（用于课程设计验收）
+- 📗 [mysql/init/](mysql/init/) - 数据库初始化脚本（含详细注释）
+- 📙 [docs/erd/index.html](docs/erd/index.html) - SchemaSpy 自动ER图报告
+
+---
+
+## 🆚 Docker服务与登录凭据速查
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+数据库服务
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+主机：localhost:3306
+容器内通信：mysql:3306
+用户名：root
+密  码：root123456
+数据库：train_station_db
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+phpMyAdmin  →  http://localhost:8082
+Adminer     →  http://localhost:8081
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+登录方式：
+  - 服务器/主机 填 "mysql"（不是localhost）
+  - 用户名     root
+  - 密  码     root123456
+  - 数据库     train_station_db
+
+🔥 phpMyAdmin 的"设计器"标签 = 交互式E-R图
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
 ---
 
@@ -336,8 +449,12 @@ curl http://localhost:8080/api/statistics/salespeople/date/2026-07-02
 
 MIT License © 2026
 
+---
+
 ## 🙏 致谢
 
 - Spring Boot / MyBatis-Plus / Element Plus 社区
 - MySQL 文档
+- Vue 3 + ECharts 官方
 - Glassmorphism设计风格启发
+- phpMyAdmin / SchemaSpy 开源项目
