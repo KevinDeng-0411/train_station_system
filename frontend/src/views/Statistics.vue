@@ -4,7 +4,18 @@
       <span class="title-bar"></span>
       数据分析中心
       <span class="date-picker-wrap">
-        <el-date-picker v-model="form.date" type="date" value-format="YYYY-MM-DD" />
+        <el-date-picker
+          v-model="form.dateRange"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="YYYY-MM-DD"
+          :shortcuts="dateShortcuts"
+          @change="onDateRangeChange"
+        />
+        <el-button type="primary" @click="loadAllData" size="default">应用筛选</el-button>
+        <el-button @click="resetDateRange" size="default">全部</el-button>
       </span>
     </h2>
 
@@ -145,7 +156,63 @@ const trainStats = ref([])
 const salespersonStats = ref([])
 
 // 查询条件
-const form = reactive({ date: '2026-07-02', trainNumber: 'G101' })
+const form = reactive({
+  dateRange: ['2026-07-02', '2026-07-02'],
+  date: '2026-07-02',  // 单日期（用于车次售票明细）
+  trainNumber: 'G101'  // 单车次（用于车次售票明细）
+})
+
+// 日期快捷选项
+const dateShortcuts = [
+  {
+    text: '今天',
+    value: () => {
+      const today = new Date()
+      return [today, today]
+    }
+  },
+  {
+    text: '最近7天',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setDate(start.getDate() - 6)
+      return [start, end]
+    }
+  },
+  {
+    text: '最近30天',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setDate(start.getDate() - 29)
+      return [start, end]
+    }
+  },
+  {
+    text: '本月',
+    value: () => {
+      const now = new Date()
+      const start = new Date(now.getFullYear(), now.getMonth(), 1)
+      return [start, now]
+    }
+  }
+]
+
+// 日期范围变化时重新加载
+const onDateRangeChange = (val) => {
+  if (val && val.length === 2) {
+    form.date = val[1] // 默认单日为结束日
+    loadAllData()
+  }
+}
+
+// 重置日期
+const resetDateRange = () => {
+  form.dateRange = null
+  form.date = new Date().toISOString().slice(0, 10)
+  loadAllData()
+}
 
 // KPI卡片定义
 const kpiCards = computed(() => [
@@ -191,29 +258,33 @@ const kpiCards = computed(() => [
 const loadAllData = async () => {
   loading.value = true
   try {
-    // KPI
+    // 提取日期范围参数
+    const startDate = form.dateRange && form.dateRange[0] ? form.dateRange[0] : null
+    const endDate = form.dateRange && form.dateRange[1] ? form.dateRange[1] : null
+
+    // KPI（始终是"今日"，不跟日期）
     const kpiRes = await statisticsApi.getKpi()
     if (kpiRes.data.success) kpiData.value = kpiRes.data.data
 
-    // 7天趋势
+    // 7天趋势（始终是最近7天）
     const trendRes = await statisticsApi.getTrend()
     if (trendRes.data.success) {
       Object.assign(trendData, trendRes.data.data)
     }
 
-    // 车次TOP
-    const trainTopRes = await statisticsApi.getTrainTop(10)
+    // 车次TOP（按日期范围筛选）
+    const trainTopRes = await statisticsApi.getTrainTop(10, startDate, endDate)
     if (trainTopRes.data.success) {
       trainTopData.value = trainTopRes.data.data
     }
 
-    // 站点热门
-    const stationRes = await statisticsApi.getStationPopular('departure', 8)
+    // 站点热门（按日期范围筛选）
+    const stationRes = await statisticsApi.getStationPopular('departure', 8, startDate, endDate)
     if (stationRes.data.success) {
       stationPopularData.value = stationRes.data.data
     }
 
-    // 业务员销售
+    // 业务员销售（按日期筛选 - 用结束日）
     const salespersonRes = await statisticsApi.getSalespersonRevenue(form.date)
     if (salespersonRes.data.success) {
       salespersonStats.value = salespersonRes.data.data

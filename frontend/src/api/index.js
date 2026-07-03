@@ -50,8 +50,8 @@ export const statisticsApi = {
   // 仪表盘新增
   getKpi: () => api.get('/statistics/kpi'),
   getTrend: () => api.get('/statistics/trend'),
-  getTrainTop: (limit = 10) => api.get('/statistics/train-top', { params: { limit } }),
-  getStationPopular: (type = 'departure', limit = 8) => api.get('/statistics/station-popular', { params: { type, limit } })
+  getTrainTop: (limit = 10, startDate, endDate) => api.get('/statistics/train-top', { params: { limit, startDate, endDate } }),
+  getStationPopular: (type = 'departure', limit = 8, startDate, endDate) => api.get('/statistics/station-popular', { params: { type, limit, startDate, endDate } })
 }
 
 // 备份恢复

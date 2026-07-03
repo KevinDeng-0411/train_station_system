@@ -144,24 +144,30 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public List<Map<String, Object>> getTrainTopRevenue(int limit) {
+    public List<Map<String, Object>> getTrainTopRevenue(int limit, String startDate, String endDate) {
+        // 默认显示全部数据
+        String start = (startDate == null || startDate.isEmpty()) ? "1970-01-01" : startDate;
+        String end = (endDate == null || endDate.isEmpty()) ? "2999-12-31" : endDate;
         String sql = "SELECT t.train_number, COUNT(tk.id) AS ticket_count, " +
                      "COALESCE(SUM(tk.price), 0) AS total_revenue " +
-                     "FROM trains t LEFT JOIN tickets tk ON t.id = tk.train_id AND tk.status = 1 " +
+                     "FROM trains t LEFT JOIN tickets tk ON t.id = tk.train_id " +
+                     "AND tk.status = 1 AND DATE(tk.sale_time) BETWEEN ? AND ? " +
                      "GROUP BY t.id, t.train_number " +
                      "ORDER BY total_revenue DESC LIMIT ?";
-        return jdbcTemplate.queryForList(sql, limit);
+        return jdbcTemplate.queryForList(sql, start, end, limit);
     }
 
     @Override
-    public List<Map<String, Object>> getStationPopularity(String type, int limit) {
+    public List<Map<String, Object>> getStationPopularity(String type, int limit, String startDate, String endDate) {
+        String start = (startDate == null || startDate.isEmpty()) ? "1970-01-01" : startDate;
+        String end = (endDate == null || endDate.isEmpty()) ? "2999-12-31" : endDate;
         String column = "departure".equals(type) ? "departure_station_id" : "arrival_station_id";
         String sql = "SELECT s.station_name, COUNT(tk.id) AS ticket_count " +
                      "FROM tickets tk JOIN stations s ON tk." + column + " = s.id " +
-                     "WHERE tk.status = 1 " +
+                     "WHERE tk.status = 1 AND DATE(tk.sale_time) BETWEEN ? AND ? " +
                      "GROUP BY s.id, s.station_name " +
                      "ORDER BY ticket_count DESC LIMIT ?";
-        return jdbcTemplate.queryForList(sql, limit);
+        return jdbcTemplate.queryForList(sql, start, end, limit);
     }
 
     private List<Map<String, Object>> resultSetToList(ResultSet rs) throws SQLException {

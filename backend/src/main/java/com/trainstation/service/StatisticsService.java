@@ -10,6 +10,6 @@ public interface StatisticsService {
     // 仪表盘新增接口
     Map<String, Object> getKpi();
     Map<String, Object> get7DayTrend();
-    List<Map<String, Object>> getTrainTopRevenue(int limit);
-    List<Map<String, Object>> getStationPopularity(String type, int limit);
+    List<Map<String, Object>> getTrainTopRevenue(int limit, String startDate, String endDate);
+    List<Map<String, Object>> getStationPopularity(String type, int limit, String startDate, String endDate);
 }

@@ -76,10 +76,13 @@ public class StatisticsController {
     }
 
     @GetMapping("/train-top")
-    public Map<String, Object> getTrainTop(@RequestParam(defaultValue = "10") int limit) {
+    public Map<String, Object> getTrainTop(
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
         Map<String, Object> result = new HashMap<>();
         try {
-            List<Map<String, Object>> data = statisticsService.getTrainTopRevenue(limit);
+            List<Map<String, Object>> data = statisticsService.getTrainTopRevenue(limit, startDate, endDate);
             result.put("success", true);
             result.put("data", data);
         } catch (Exception e) {
@@ -92,10 +95,12 @@ public class StatisticsController {
     @GetMapping("/station-popular")
     public Map<String, Object> getStationPopular(
             @RequestParam(defaultValue = "departure") String type,
-            @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
         Map<String, Object> result = new HashMap<>();
         try {
-            List<Map<String, Object>> data = statisticsService.getStationPopularity(type, limit);
+            List<Map<String, Object>> data = statisticsService.getStationPopularity(type, limit, startDate, endDate);
             result.put("success", true);
             result.put("data", data);
         } catch (Exception e) {
