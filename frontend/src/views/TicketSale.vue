@@ -243,12 +243,14 @@ const availableArrivalStations = computed(() => {
   return trainStations.value.filter(s => s.stopOrder > dep.stopOrder)
 })
 
-// 到达站变化：自动从数据库价格填入
+// 到达站变化：从价格表计算（到达站价格 - 出发站价格）
 const calcPrice = () => {
-  if (saleForm.arrivalStationId) {
+  if (saleForm.arrivalStationId && saleForm.departureStationId) {
+    const dep = trainStations.value.find(s => s.stationId === saleForm.departureStationId)
     const arr = trainStations.value.find(s => s.stationId === saleForm.arrivalStationId)
-    if (arr) {
-      saleForm.price = Number(arr.price) || 0
+    if (dep && arr) {
+      const segmentPrice = Number(arr.price || 0) - Number(dep.price || 0)
+      saleForm.price = segmentPrice > 0 ? segmentPrice : 0
       priceFromDb.value = true
     }
   }
