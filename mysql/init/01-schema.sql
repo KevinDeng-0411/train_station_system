@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS trains (
     INDEX idx_arrival (arrival_city),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='车次信息表';
+-- 性能优化：组合查询索引 idx_dep_arr_status 在 05-performance-indexes.sql 中创建
 
 -- ----------------------------------------------------------------------------
 -- 3. 车次站点关联表 (train_stations)
@@ -122,10 +123,10 @@ CREATE TABLE IF NOT EXISTS train_stations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     FOREIGN KEY (train_id) REFERENCES trains(id) ON DELETE CASCADE,
     FOREIGN KEY (station_id) REFERENCES stations(id) ON DELETE CASCADE,
-    UNIQUE KEY uk_train_station (train_id, station_id),
-    INDEX idx_train (train_id),
-    INDEX idx_station (station_id)
+    UNIQUE KEY uk_train_station (train_id, station_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='车次经停站点及价格表';
+-- 性能优化：车次经停查询消除filesort（替代idx_train）
+-- 见 05-performance-indexes.sql 详细说明
 
 -- ----------------------------------------------------------------------------
 -- 4. 业务员表 (salespeople)
@@ -147,9 +148,9 @@ CREATE TABLE IF NOT EXISTS salespeople (
     status TINYINT DEFAULT 1 COMMENT '状态: 0离职 1在职',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY uk_employee_code (employee_code),
-    INDEX idx_status (status)
+    UNIQUE KEY uk_employee_code (employee_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='业务员信息表';
+-- 性能优化：name / employee_code 单列索引在 05-performance-indexes.sql 中创建
 
 -- ----------------------------------------------------------------------------
 -- 5. 车票表 (tickets)
@@ -192,9 +193,13 @@ CREATE TABLE IF NOT EXISTS tickets (
     UNIQUE KEY uk_train_date_seat (train_id, sale_date, seat_number),
     INDEX idx_train_date (train_id, sale_date),
     INDEX idx_salesperson (salesperson_id),
-    INDEX idx_sale_date (sale_date),
-    INDEX idx_status (status)
+    INDEX idx_sale_date (sale_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='车票销售记录表';
+-- 性能优化：以下3个索引在 05-performance-indexes.sql 中创建
+--   idx_status_sale_time    - KPI/趋势查询（替代idx_status）
+--   idx_train_status_time    - 票务分页
+--   idx_depart_status_time   - 站点热度
+--   idx_salesperson_status_time - 业务员工资统计
 
 -- ----------------------------------------------------------------------------
 -- 6. 退票记录表 (refund_records)

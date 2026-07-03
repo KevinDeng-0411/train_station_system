@@ -8,5 +8,6 @@ COPY init/01-schema.sql /docker-entrypoint-initdb.d/
 COPY init/02-triggers.sql /docker-entrypoint-initdb.d/
 COPY init/03-procedures.sql /docker-entrypoint-initdb.d/
 COPY init/04-sample-data.sql /docker-entrypoint-initdb.d/
+COPY init/05-performance-indexes.sql /docker-entrypoint-initdb.d/
 
 EXPOSE 3306
