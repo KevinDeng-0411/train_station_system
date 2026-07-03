@@ -55,19 +55,29 @@
     </el-card>
 
     <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="550px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-form-item label="车次号" prop="trainNumber">
           <el-input v-model="form.trainNumber" :disabled="!!form.id" />
         </el-form-item>
-        <el-form-item label="出发城市" prop="departureCity">
+        <el-form-item label="出发站点" prop="departureStationId" v-if="!form.id">
+          <el-select v-model="form.departureStationId" placeholder="请选择出发站（关联train_stations）" filterable style="width: 100%">
+            <el-option v-for="s in stationList" :key="s.id" :label="`${s.stationName}（${s.city}）`" :value="s.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="到达站点" prop="arrivalStationId" v-if="!form.id">
+          <el-select v-model="form.arrivalStationId" placeholder="请选择到达站（关联train_stations）" filterable style="width: 100%">
+            <el-option v-for="s in stationList" :key="s.id" :label="`${s.stationName}（${s.city}）`" :value="s.id" :disabled="s.id === form.departureStationId" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="出发城市" prop="departureCity" v-if="!!form.id">
           <el-input v-model="form.departureCity" />
         </el-form-item>
-        <el-form-item label="到达城市" prop="arrivalCity">
+        <el-form-item label="到达城市" prop="arrivalCity" v-if="!!form.id">
           <el-input v-model="form.arrivalCity" />
         </el-form-item>
         <el-form-item label="总座位数" prop="totalSeats">
-          <el-input-number v-model="form.totalSeats" :min="1" />
+          <el-input-number v-model="form.totalSeats" :min="1" :max="2000" />
         </el-form-item>
         <el-form-item label="发车时间" prop="departureTime">
           <el-time-picker v-model="form.departureTime" format="HH:mm:ss" value-format="HH:mm:ss" style="width: 100%;" />
@@ -77,6 +87,9 @@
             <el-radio :label="1">正常</el-radio>
             <el-radio :label="0">停运</el-radio>
           </el-radio-group>
+        </el-form-item>
+        <el-form-item v-if="!form.id">
+          <el-tag type="info">💡 创建车次时将同步生成经停站记录（始发+终到）</el-tag>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -94,6 +107,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { trainApi } from '@/api'
+import axios from 'axios'
 import TrainDetail from './TrainDetail.vue'
 
 const loading = ref(false)
@@ -103,6 +117,7 @@ const dialogTitle = ref('新增车次')
 const formRef = ref(null)
 const detailVisible = ref(false)
 const detailTrain = ref(null)
+const stationList = ref([])
 
 const searchForm = reactive({ keyword: '' })
 const pagination = reactive({ page: 1, size: 10, total: 0 })
@@ -111,6 +126,8 @@ const form = reactive({
   trainNumber: '',
   departureCity: '',
   arrivalCity: '',
+  departureStationId: null,
+  arrivalStationId: null,
   totalSeats: 100,
   remainingSeats: 100,
   departureTime: '08:00:00',
@@ -121,8 +138,16 @@ const rules = {
   trainNumber: [{ required: true, message: '请输入车次号', trigger: 'blur' }],
   departureCity: [{ required: true, message: '请输入出发城市', trigger: 'blur' }],
   arrivalCity: [{ required: true, message: '请输入到达城市', trigger: 'blur' }],
+  departureStationId: [{ required: true, message: '请选择出发站', trigger: 'change' }],
+  arrivalStationId: [{ required: true, message: '请选择到达站', trigger: 'change' }],
   totalSeats: [{ required: true, message: '请输入总座位数', trigger: 'blur' }],
   departureTime: [{ required: true, message: '请选择发车时间', trigger: 'change' }]
+}
+
+// 加载站点列表
+const loadStations = async () => {
+  const res = await axios.get('/api/stations')
+  if (res.data.success) stationList.value = res.data.data
 }
 
 const loadData = async () => {
@@ -147,9 +172,10 @@ const handleSearch = () => {
 }
 
 const handleAdd = () => {
-  Object.assign(form, { id: null, trainNumber: '', departureCity: '', arrivalCity: '', totalSeats: 100, remainingSeats: 100, departureTime: '08:00:00', status: 1 })
+  Object.assign(form, { id: null, trainNumber: '', departureCity: '', arrivalCity: '', departureStationId: null, arrivalStationId: null, totalSeats: 100, remainingSeats: 100, departureTime: '08:00:00', status: 1 })
   dialogTitle.value = '新增车次'
   dialogVisible.value = true
+  if (stationList.value.length === 0) loadStations()
 }
 
 const handleViewDetail = (row) => {
@@ -183,10 +209,23 @@ const handleSubmit = async () => {
   await formRef.value.validate(async (valid) => {
     if (!valid) return
     try {
-      const api = form.id ? trainApi.update(form.id, form) : trainApi.create(form)
-      const res = await api
+      let res
+      if (form.id) {
+        // 编辑：用旧接口
+        res = await trainApi.update(form.id, form)
+      } else {
+        // 新增：用新接口（+ 站点自动关联）
+        res = await axios.post('/api/trains/with-stations', {
+          trainNumber: form.trainNumber,
+          departureStationId: form.departureStationId,
+          arrivalStationId: form.arrivalStationId,
+          totalSeats: form.totalSeats,
+          departureTime: form.departureTime,
+          status: form.status
+        })
+      }
       if (res.data.success) {
-        ElMessage.success(form.id ? '更新成功' : '创建成功')
+        ElMessage.success(res.data.message || (form.id ? '更新成功' : '创建成功'))
         dialogVisible.value = false
         loadData()
       } else {
@@ -198,5 +237,5 @@ const handleSubmit = async () => {
   })
 }
 
-onMounted(() => loadData())
+onMounted(() => { loadData(); loadStations() })
 </script>

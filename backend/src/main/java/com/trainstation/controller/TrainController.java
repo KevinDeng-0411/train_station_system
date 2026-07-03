@@ -58,6 +58,21 @@ public class TrainController {
         return result;
     }
 
+    @PostMapping("/with-stations")
+    public Map<String, Object> createTrainWithStations(@Valid @RequestBody com.trainstation.dto.TrainCreateRequest request) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            com.trainstation.entity.Train train = trainService.createTrainWithStations(request);
+            result.put("success", true);
+            result.put("message", "创建成功，已同步生成经停站记录");
+            result.put("data", train);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
     @PutMapping("/{id}")
     public Map<String, Object> updateTrain(@PathVariable Long id, @Valid @RequestBody Train train) {
         Map<String, Object> result = new HashMap<>();
