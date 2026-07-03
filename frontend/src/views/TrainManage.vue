@@ -33,8 +33,9 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column label="操作" width="260" fixed="right">
           <template #default="{ row }">
+            <el-button size="small" type="info" @click="handleViewDetail(row)">详情</el-button>
             <el-button size="small" type="primary" @click="handleEdit(row)">编辑</el-button>
             <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
@@ -83,6 +84,9 @@
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- 车次详情弹窗 -->
+    <TrainDetail v-model:visible="detailVisible" :train="detailTrain" />
   </div>
 </template>
 
@@ -90,12 +94,15 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { trainApi } from '@/api'
+import TrainDetail from './TrainDetail.vue'
 
 const loading = ref(false)
 const tableData = ref([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增车次')
 const formRef = ref(null)
+const detailVisible = ref(false)
+const detailTrain = ref(null)
 
 const searchForm = reactive({ keyword: '' })
 const pagination = reactive({ page: 1, size: 10, total: 0 })
@@ -143,6 +150,11 @@ const handleAdd = () => {
   Object.assign(form, { id: null, trainNumber: '', departureCity: '', arrivalCity: '', totalSeats: 100, remainingSeats: 100, departureTime: '08:00:00', status: 1 })
   dialogTitle.value = '新增车次'
   dialogVisible.value = true
+}
+
+const handleViewDetail = (row) => {
+  detailTrain.value = row
+  detailVisible.value = true
 }
 
 const handleEdit = (row) => {

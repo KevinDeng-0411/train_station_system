@@ -74,6 +74,16 @@ public class TicketController {
         return result;
     }
 
+    @GetMapping("/sold-seats")
+    public Map<String, Object> getSoldSeats(
+            @RequestParam Long trainId,
+            @RequestParam String saleDate) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("data", ticketService.getSoldSeats(trainId, java.time.LocalDate.parse(saleDate)));
+        return result;
+    }
+
     @GetMapping("/check-seat")
     public Map<String, Object> checkSeatAvailable(
             @RequestParam Long trainId,

@@ -5,6 +5,7 @@ import com.trainstation.dto.TicketDetailDto;
 import com.trainstation.entity.Ticket;
 import com.trainstation.entity.RefundRecord;
 import java.time.LocalDate;
+import java.util.List;
 
 public interface TicketService {
     Page<TicketDetailDto> getTicketPage(int pageNum, int pageSize, Long trainId, Long salespersonId);
@@ -12,4 +13,5 @@ public interface TicketService {
     Ticket saleTicket(Ticket ticket);
     RefundRecord refundTicket(Long ticketId, Long operatorId, String reason);
     boolean isSeatAvailable(Long trainId, String seatNumber, LocalDate saleDate);
+    List<String> getSoldSeats(Long trainId, LocalDate saleDate);
 }

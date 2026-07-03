@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TicketServiceImpl implements TicketService {
@@ -127,5 +130,17 @@ public class TicketServiceImpl implements TicketService {
                .eq(Ticket::getSaleDate, saleDate)
                .eq(Ticket::getStatus, 1);
         return ticketMapper.selectCount(wrapper) == 0;
+    }
+
+    @Override
+    public List<String> getSoldSeats(Long trainId, LocalDate saleDate) {
+        LambdaQueryWrapper<Ticket> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Ticket::getTrainId, trainId)
+               .eq(Ticket::getSaleDate, saleDate)
+               .eq(Ticket::getStatus, 1)
+               .select(Ticket::getSeatNumber);
+        return ticketMapper.selectList(wrapper).stream()
+                .map(Ticket::getSeatNumber)
+                .collect(Collectors.toList());
     }
 }
