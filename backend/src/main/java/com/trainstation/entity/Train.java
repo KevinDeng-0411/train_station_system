@@ -38,4 +38,11 @@ public class Train {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
+
+    // 关联查询字段（不在表中）
+    @TableField(exist = false)
+    private String departureStationName;
+
+    @TableField(exist = false)
+    private String arrivalStationName;
 }

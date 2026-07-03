@@ -31,7 +31,9 @@ public class TrainServiceImpl implements TrainService {
 
     @Override
     public List<Train> getAllTrains() {
-        return trainMapper.selectList(null);
+        List<Train> trains = trainMapper.selectList(null);
+        populateStationNames(trains);
+        return trains;
     }
 
     @Override
@@ -57,7 +59,9 @@ public class TrainServiceImpl implements TrainService {
                    .or()
                    .like(Train::getArrivalCity, keyword);
         }
-        return trainMapper.selectPage(page, wrapper);
+        Page<Train> result = trainMapper.selectPage(page, wrapper);
+        populateStationNames(result.getRecords());
+        return result;
     }
 
     @Override
@@ -114,6 +118,29 @@ public class TrainServiceImpl implements TrainService {
     @Override
     public boolean deleteTrain(Long id) {
         return trainMapper.deleteById(id) > 0;
+    }
+
+    // 批量填充车次的始发站和终到站名称
+    private void populateStationNames(List<Train> trains) {
+        for (Train train : trains) {
+            LambdaQueryWrapper<TrainStation> depW = new LambdaQueryWrapper<>();
+            depW.eq(TrainStation::getTrainId, train.getId())
+                .eq(TrainStation::getStopOrder, 1);
+            TrainStation depTs = trainStationMapper.selectOne(depW);
+            if (depTs != null) {
+                Station depStation = stationMapper.selectById(depTs.getStationId());
+                train.setDepartureStationName(depStation != null ? depStation.getStationName() : null);
+            }
+            LambdaQueryWrapper<TrainStation> arrW = new LambdaQueryWrapper<>();
+            arrW.eq(TrainStation::getTrainId, train.getId())
+                .orderByDesc(TrainStation::getStopOrder)
+                .last("LIMIT 1");
+            TrainStation arrTs = trainStationMapper.selectOne(arrW);
+            if (arrTs != null) {
+                Station arrStation = stationMapper.selectById(arrTs.getStationId());
+                train.setArrivalStationName(arrStation != null ? arrStation.getStationName() : null);
+            }
+        }
     }
 
     @Override

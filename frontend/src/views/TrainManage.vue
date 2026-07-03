@@ -15,8 +15,21 @@
       <el-table :data="tableData" border stripe v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="trainNumber" label="车次号" width="120" />
-        <el-table-column prop="departureCity" label="出发城市" width="120" />
-        <el-table-column prop="arrivalCity" label="到达城市" width="120" />
+        <el-table-column label="出发站→到达站" min-width="260">
+          <template #default="{ row }">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="text-align: right; flex: 1;">
+                <div style="font-weight: 600; color: #0F172A;">{{ row.departureStationName || row.departureCity }}</div>
+                <div style="font-size: 11px; color: #94A3B8;">{{ row.departureCity }}</div>
+              </div>
+              <span style="color: #0891B2; font-weight: 700; font-size: 18px;">→</span>
+              <div style="flex: 1;">
+                <div style="font-weight: 600; color: #0F172A;">{{ row.arrivalStationName || row.arrivalCity }}</div>
+                <div style="font-size: 11px; color: #94A3B8;">{{ row.arrivalCity }}</div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="totalSeats" label="总座位" width="100" />
         <el-table-column prop="remainingSeats" label="余票" width="100">
           <template #default="{ row }">
