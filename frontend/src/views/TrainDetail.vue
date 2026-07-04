@@ -50,19 +50,19 @@
         <el-table-column label="到达时间" width="120">
           <template #default="{ row }">
             <el-time-picker v-if="row.stopOrder > 1" v-model="row._arrivalTime" format="HH:mm:ss" value-format="HH:mm:ss" size="small" style="width: 110px;" @change="updateTime(row)" />
-            <span v-else style="color: #94A3B8; font-size: 12px;">始发</span>
+            <span v-else class="text-muted-hint">始发</span>
           </template>
         </el-table-column>
         <el-table-column label="出发时间" width="120">
           <template #default="{ row }">
             <el-time-picker v-if="!isLastStop(row)" v-model="row._departureTime" format="HH:mm:ss" value-format="HH:mm:ss" size="small" style="width: 110px;" @change="updateTime(row)" />
-            <span v-else style="color: #94A3B8; font-size: 12px;">终到</span>
+            <span v-else class="text-muted-hint">终到</span>
           </template>
         </el-table-column>
         <el-table-column label="票价(¥)" width="120" align="right">
           <template #default="{ row }">
             <el-input-number v-if="row.stopOrder > 1" v-model="row.price" :min="0" :precision="2" size="small" controls-position="right" style="width: 110px;" @change="updatePrice(row)" />
-            <span v-else style="color: #94A3B8; font-size: 12px;">起点</span>
+            <span v-else class="text-muted-hint">起点</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="70" align="center">
@@ -212,24 +212,24 @@ const removeStation = async (row) => {
 .detail-header {
   display: flex; align-items: center; gap: 20px;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #0891B2, #06B6D4);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
   color: white; border-radius: 12px; margin-bottom: 20px;
 }
 .train-no { font-size: 28px; font-weight: 800; letter-spacing: 1px; }
 .train-route { flex: 1; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 600; }
-.train-route .arrow { font-size: 22px; color: #CFFAFE; }
+.train-route .arrow { font-size: 22px; color: var(--primitive-cyan-100); }
 .metrics { margin-bottom: 18px; }
 .metric {
-  background: rgba(255,255,255,0.85); border: 1px solid rgba(8,145,178,0.1);
+  background: var(--color-glass-bg-deep); border: 1px solid var(--color-border);
   border-radius: 8px; padding: 12px; text-align: center;
 }
-.metric-label { font-size: 12px; color: #64748B; margin-bottom: 4px; }
-.metric-value { font-size: 22px; font-weight: 700; color: #0891B2; font-family: 'JetBrains Mono', monospace; }
-.metric-value.low { color: #EF4444; }
-.section-title { font-size: 14px; font-weight: 600; color: #475569; margin: 0; }
+.metric-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.metric-value { font-size: 22px; font-weight: 700; color: var(--color-primary); font-family: 'JetBrains Mono', monospace; }
+.metric-value.low { color: var(--color-danger); }
+.section-title { font-size: 14px; font-weight: 600; color: var(--color-text-secondary); margin: 0; }
 .hint {
-  margin-top: 12px; padding: 8px 12px; background: #F0F9FF;
-  border-left: 3px solid #06B6D4; font-size: 12px; color: #475569; border-radius: 4px;
+  margin-top: 12px; padding: 8px 12px; background: var(--primitive-cyan-50);
+  border-left: 3px solid var(--color-primary-light); font-size: 12px; color: var(--color-text-secondary); border-radius: 4px;
 }
-.hint code { background: #E0F2FE; color: #0891B2; padding: 1px 6px; border-radius: 3px; }
+.hint code { background: var(--primitive-cyan-100); color: var(--color-primary); padding: 1px 6px; border-radius: 3px; }
 </style>

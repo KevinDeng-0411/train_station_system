@@ -2,7 +2,7 @@
   <div>
     <h2>业务员管理</h2>
     <el-card>
-      <el-form :inline="true" :model="searchForm" style="margin-bottom: 15px;">
+      <el-form :inline="true" :model="searchForm" class="mb-sm">
         <el-form-item label="关键词">
           <el-input v-model="searchForm.keyword" placeholder="姓名/工号" clearable />
         </el-form-item>
@@ -41,7 +41,7 @@
         layout="total, sizes, prev, pager, next"
         @size-change="loadData"
         @current-change="loadData"
-        style="margin-top: 15px;"
+        class="mt-sm"
       />
     </el-card>
 

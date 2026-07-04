@@ -8,7 +8,7 @@
             v-model="saleForm.trainId"
             placeholder="请选择车次"
             @change="onTrainChange"
-            style="width: 100%;"
+            class="w-full"
             filterable
           >
             <el-option
@@ -25,7 +25,7 @@
             v-model="saleForm.departureStationId"
             placeholder="请先选择车次"
             @change="onDepartureChange"
-            style="width: 100%;"
+            class="w-full"
             :disabled="!saleForm.trainId || loadingStations"
           >
             <el-option
@@ -41,7 +41,7 @@
             v-model="saleForm.arrivalStationId"
             placeholder="请选择到达站"
             @change="calcPrice"
-            style="width: 100%;"
+            class="w-full"
             :disabled="!saleForm.departureStationId"
           >
             <el-option
@@ -53,13 +53,13 @@
           </el-select>
         </el-form-item>
         <el-form-item label="票价" prop="price">
-          <el-input-number v-model="saleForm.price" :min="0" :precision="2" style="width: 100%;" />
-          <span style="margin-left: 10px; color: #64748B; font-size: 12px;" v-if="priceFromDb">
+          <el-input-number v-model="saleForm.price" :min="0" :precision="2" class="w-full" />
+          <span class="price-hint" v-if="priceFromDb">
             📌 来源: <code>train_stations.price</code>
           </span>
         </el-form-item>
         <el-form-item label="乘车日期" prop="saleDate">
-          <el-date-picker v-model="saleForm.saleDate" type="date" value-format="YYYY-MM-DD" style="width: 100%;" />
+          <el-date-picker v-model="saleForm.saleDate" type="date" value-format="YYYY-MM-DD" class="w-full" />
         </el-form-item>
         <el-form-item label="乘客姓名" prop="passengerName">
           <el-input v-model="saleForm.passengerName" />
@@ -68,7 +68,7 @@
           <el-input v-model="saleForm.passengerIdCard" placeholder="18位身份证号" maxlength="18" />
         </el-form-item>
         <el-form-item label="售票员" prop="salespersonId">
-          <el-select v-model="saleForm.salespersonId" placeholder="请选择售票员" style="width: 100%;">
+          <el-select v-model="saleForm.salespersonId" placeholder="请选择售票员" class="w-full">
             <el-option v-for="s in salespersonList" :key="s.id" :label="`${s.name}（${s.employeeCode}）`" :value="s.id" />
           </el-select>
         </el-form-item>
@@ -89,7 +89,7 @@
       />
     </el-card>
 
-    <el-card style="margin-top: 20px;">
+    <el-card class="mt-md">
       <div class="card-header">
         <h3>销售记录</h3>
         <el-button size="small" @click="loadTickets">刷新</el-button>
@@ -113,7 +113,7 @@
         <el-table-column prop="salespersonName" label="售票员" width="100" />
         <el-table-column prop="price" label="票价" width="100">
           <template #default="{ row }">
-            <span style="font-weight: 600; color: #0891B2;">¥{{ row.price }}</span>
+            <span class="text-money">¥{{ row.price }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="saleDate" label="乘车日期" width="120" />
@@ -124,7 +124,7 @@
         </el-table-column>
       </el-table>
       <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size" :total="pagination.total"
-        layout="total, prev, pager, next" @current-change="loadTickets" style="margin-top: 15px;" />
+        layout="total, prev, pager, next" @current-change="loadTickets" class="mt-sm" />
     </el-card>
   </div>
 </template>
@@ -313,8 +313,8 @@ onMounted(async () => {
   margin: 0;
 }
 code {
-  background: #F1F5F9;
-  color: #0891B2;
+  background: var(--primitive-slate-100);
+  color: var(--color-primary);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;

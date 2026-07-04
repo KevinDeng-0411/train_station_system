@@ -47,6 +47,37 @@ public class StatisticsServiceImpl implements StatisticsService {
         return jdbcTemplate.execute(sql, callback);
     }
 
+    @Override
+    public List<Map<String, Object>> getTrainSalesByRange(String trainNumber, String startDate, String endDate) {
+        String sql = "CALL sp_train_sales_by_range(?, ?, ?)";
+        CallableStatementCallback<List<Map<String, Object>>> callback = cs -> {
+            cs.setString(1, trainNumber);
+            cs.setString(2, startDate);
+            cs.setString(3, endDate);
+            boolean hasResultSet = cs.execute();
+            if (hasResultSet) {
+                return resultSetToList(cs.getResultSet());
+            }
+            return new ArrayList<>();
+        };
+        return jdbcTemplate.execute(sql, callback);
+    }
+
+    @Override
+    public List<Map<String, Object>> getSalespersonRevenueByRange(String startDate, String endDate) {
+        String sql = "CALL sp_salesperson_revenue_by_range(?, ?)";
+        CallableStatementCallback<List<Map<String, Object>>> callback = cs -> {
+            cs.setString(1, startDate);
+            cs.setString(2, endDate);
+            boolean hasResultSet = cs.execute();
+            if (hasResultSet) {
+                return resultSetToList(cs.getResultSet());
+            }
+            return new ArrayList<>();
+        };
+        return jdbcTemplate.execute(sql, callback);
+    }
+
     // ========== 仪表盘新增 ==========
 
     @Override

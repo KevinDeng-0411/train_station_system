@@ -7,7 +7,7 @@
           <el-input-number v-model="refundForm.ticketId" :min="1" style="width: 200px;" :disabled="!!presetTicketId" />
         </el-form-item>
         <el-form-item label="操作员" prop="operatorId">
-          <el-select v-model="refundForm.operatorId" placeholder="请选择操作员" style="width: 100%;">
+          <el-select v-model="refundForm.operatorId" placeholder="请选择操作员" class="w-full">
             <el-option v-for="s in salespersonList" :key="s.id" :label="`${s.name}（${s.employeeCode}）`" :value="s.id" />
           </el-select>
         </el-form-item>
@@ -21,7 +21,7 @@
       </el-form>
     </el-card>
 
-    <el-card style="margin-top: 20px;">
+    <el-card class="mt-md">
       <div class="card-header">
         <h3>有效车票列表（点击行可快速退票）</h3>
         <el-button size="small" @click="loadTickets">刷新</el-button>
@@ -44,7 +44,7 @@
         <el-table-column label="出发→到达" min-width="200">
           <template #default="{ row }">
             <span>{{ row.departureStationName }}</span>
-            <span style="color: #0891B2; margin: 0 6px;">→</span>
+            <span class="route-arrow">→</span>
             <span>{{ row.arrivalStationName }}</span>
           </template>
         </el-table-column>
@@ -52,7 +52,7 @@
         <el-table-column prop="passengerName" label="乘客" width="100" />
         <el-table-column prop="price" label="票价" width="90">
           <template #default="{ row }">
-            <span style="font-weight: 600; color: #0891B2;">¥{{ row.price }}</span>
+            <span class="text-money">¥{{ row.price }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="salespersonName" label="售票员" width="100" />

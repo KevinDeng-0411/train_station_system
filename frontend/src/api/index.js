@@ -46,7 +46,9 @@ export const ticketApi = {
 // 统计报表
 export const statisticsApi = {
   getTrainSales: (trainNumber, date) => api.get(`/statistics/trains/${trainNumber}/date/${date}`),
+  getTrainSalesByRange: (trainNumber, startDate, endDate) => api.get(`/statistics/trains/${trainNumber}/range`, { params: { startDate, endDate } }),
   getSalespersonRevenue: (date) => api.get(`/statistics/salespeople/date/${date}`),
+  getSalespersonRevenueByRange: (startDate, endDate) => api.get(`/statistics/salespeople/range`, { params: { startDate, endDate } }),
   // 仪表盘新增
   getKpi: () => api.get('/statistics/kpi'),
   getTrend: () => api.get('/statistics/trend'),

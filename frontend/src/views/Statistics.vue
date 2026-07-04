@@ -63,29 +63,29 @@
         <span class="title-bar"></span>
         车次售票明细
         <span class="form-inline">
-          <el-input v-model="form.trainNumber" placeholder="车次号" clearable style="width: 140px;" />
+          <el-input v-model="form.trainNumber" placeholder="车次号" clearable class="w-140" />
           <el-button type="primary" @click="loadTrainSales">查询</el-button>
         </span>
       </div>
-      <el-table :data="trainStats" border stripe v-loading="trainLoading" empty-text="暂无售票数据">
-        <el-table-column prop="train_number" label="车次" width="100" />
-        <el-table-column label="出发站" width="110">
+      <el-table :data="trainStats" border stripe v-loading="trainLoading" empty-text="暂无售票数据" class="w-full" style="width: 100%;">
+        <el-table-column prop="train_number" label="车次" min-width="90" />
+        <el-table-column label="出发站" min-width="120">
           <template #default="{ row }">{{ row.departure_station || '-' }}</template>
         </el-table-column>
-        <el-table-column label="到达站" width="110">
+        <el-table-column label="到达站" min-width="120">
           <template #default="{ row }">{{ row.arrival_station || '-' }}</template>
         </el-table-column>
-        <el-table-column prop="ticket_count" label="售票数" width="100" align="center">
+        <el-table-column prop="ticket_count" label="售票数" min-width="90" align="center">
           <template #default="{ row }">
             <el-tag type="info" effect="plain">{{ row.ticket_count || 0 }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="收入" width="140" align="right">
+        <el-table-column label="收入" min-width="120" align="right">
           <template #default="{ row }">
             <span class="money">¥{{ Number(row.total_amount || 0).toLocaleString() }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="remaining_seats" label="余票" width="100" align="center">
+        <el-table-column prop="remaining_seats" label="余票" min-width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="row.remaining_seats > 10 ? 'success' : 'danger'">
               {{ row.remaining_seats }}
@@ -101,16 +101,16 @@
         <span class="title-bar"></span>
         业务员收入排行
       </div>
-      <el-table :data="salespersonStats" border stripe v-loading="salespersonLoading" empty-text="暂无销售数据">
-        <el-table-column type="index" label="#排名" width="80" align="center">
+      <el-table :data="salespersonStats" border stripe v-loading="salespersonLoading" empty-text="暂无销售数据" class="w-full" style="width: 100%;">
+        <el-table-column type="index" label="#排名" width="90" align="center">
           <template #default="{ row, $index }">
             <span :class="['rank-badge', `rank-${Math.min($index + 1, 3)}`]">{{ $index + 1 }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="employee_code" label="工号" width="120" />
-        <el-table-column prop="salesperson_name" label="姓名" width="120" />
-        <el-table-column prop="ticket_count" label="售票数" width="100" align="center" />
-        <el-table-column label="销售收入" width="160" align="right">
+        <el-table-column prop="employee_code" label="工号" min-width="120" />
+        <el-table-column prop="salesperson_name" label="姓名" min-width="100" />
+        <el-table-column prop="ticket_count" label="售票数" min-width="100" align="center" />
+        <el-table-column label="销售收入" min-width="140" align="right">
           <template #default="{ row }">
             <span class="money">¥{{ Number(row.total_revenue || 0).toLocaleString() }}</span>
           </template>
@@ -157,8 +157,8 @@ const salespersonStats = ref([])
 
 // 查询条件
 const form = reactive({
-  dateRange: ['2026-07-02', '2026-07-02'],
-  date: '2026-07-02',  // 单日期（用于车次售票明细）
+  dateRange: [],  // 默认空 → onMounted 时设为最近7天
+  date: new Date().toISOString().slice(0, 10),  // 默认今天（跟随 dateRange 末位）
   trainNumber: 'G101'  // 单车次（用于车次售票明细）
 })
 
@@ -222,7 +222,7 @@ const kpiCards = computed(() => [
     value: kpiData.value.todayTickets,
     unit: '张',
     icon: Tickets,
-    color: '#0891B2',
+    color: 'var(--color-primary)',
     extra: '实时数据'
   },
   {
@@ -231,7 +231,7 @@ const kpiCards = computed(() => [
     value: Number(kpiData.value.todayRevenue || 0).toLocaleString(),
     unit: '元',
     icon: Wallet,
-    color: '#06B6D4',
+    color: 'var(--color-primary-light)',
     extra: '今日总销售额'
   },
   {
@@ -284,13 +284,13 @@ const loadAllData = async () => {
       stationPopularData.value = stationRes.data.data
     }
 
-    // 业务员销售（按日期筛选 - 用结束日）
-    const salespersonRes = await statisticsApi.getSalespersonRevenue(form.date)
+    // 业务员销售（按日期范围）
+    const salespersonRes = await statisticsApi.getSalespersonRevenueByRange(startDate, endDate)
     if (salespersonRes.data.success) {
       salespersonStats.value = salespersonRes.data.data
     }
 
-    // 车次售票明细（用 form.trainNumber 和 form.date）
+    // 车次售票明细（用 form.trainNumber + 日期范围）
     await loadTrainSales()
   } catch (e) {
     console.error('加载仪表盘数据失败:', e)
@@ -302,7 +302,26 @@ const loadAllData = async () => {
 const loadTrainSales = async () => {
   trainLoading.value = true
   try {
-    const res = await statisticsApi.getTrainSales(form.trainNumber, form.date)
+    // 使用日期范围（如果用户已选）或默认最近 7 天
+    let startDate, endDate
+    if (form.dateRange && form.dateRange.length === 2) {
+      startDate = form.dateRange[0]
+      endDate = form.dateRange[1]
+    } else {
+      const end = new Date()
+      const start = new Date()
+      start.setDate(start.getDate() - 6)
+      startDate = start
+      endDate = end
+    }
+    const fmt = (d) => {
+      const date = typeof d === 'string' ? new Date(d) : d
+      const pad = (n) => String(n).padStart(2, '0')
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+    }
+    const res = await statisticsApi.getTrainSalesByRange(
+      form.trainNumber, fmt(startDate), fmt(endDate)
+    )
     if (res.data.success) trainStats.value = res.data.data
     else trainStats.value = []
   } catch (e) {
@@ -313,6 +332,12 @@ const loadTrainSales = async () => {
 }
 
 onMounted(() => {
+  // 初始化默认日期范围为"最近 7 天"（含今天）
+  const end = new Date()
+  const start = new Date()
+  start.setDate(start.getDate() - 6)
+  form.dateRange = [start, end]
+  form.date = end.toISOString().slice(0, 10)
   loadAllData()
 })
 </script>
@@ -329,14 +354,14 @@ onMounted(() => {
   gap: 12px;
   font-size: 22px;
   font-weight: 700;
-  color: #0F172A;
+  color: var(--color-text-primary);
   margin: 0 0 20px;
 }
 .title-bar {
   display: inline-block;
   width: 4px;
   height: 22px;
-  background: linear-gradient(180deg, #0891B2, #06B6D4);
+  background: linear-gradient(180deg, var(--color-primary), var(--color-primary-light));
   border-radius: 2px;
 }
 .date-picker-wrap {
@@ -349,13 +374,13 @@ onMounted(() => {
 }
 .kpi-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--color-glass-bg-deep);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--color-glass-border);
   border-radius: 16px;
   padding: 18px 20px;
   margin-bottom: 12px;
-  box-shadow: 0 8px 32px rgba(8, 145, 178, 0.08);
+  box-shadow: 0 8px 32px var(--color-border);
   border-left: 4px solid var(--accent);
   overflow: hidden;
   transition: transform 0.25s, box-shadow 0.25s;
@@ -374,7 +399,7 @@ onMounted(() => {
 }
 .kpi-label {
   font-size: 13px;
-  color: #64748B;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 .kpi-value {
@@ -391,12 +416,12 @@ onMounted(() => {
 }
 .kpi-value .unit {
   font-size: 12px;
-  color: #94A3B8;
+  color: var(--color-text-muted);
 }
 .kpi-extra {
   font-size: 11px;
-  color: #94A3B8;
-  border-top: 1px dashed #E2E8F0;
+  color: var(--color-text-muted);
+  border-top: 1px dashed var(--primitive-slate-200);
   padding-top: 6px;
   margin-top: 4px;
 }
@@ -416,7 +441,7 @@ onMounted(() => {
   gap: 8px;
   font-size: 16px;
   font-weight: 700;
-  color: #0F172A;
+  color: var(--color-text-primary);
   margin-bottom: 12px;
 }
 .form-inline {
@@ -427,8 +452,8 @@ onMounted(() => {
 
 .money {
   font-weight: 700;
-  color: #0891B2;
-  font-family: 'JetBrains Mono', monospace;
+  color: var(--color-primary);
+  font-family: var(--font-mono);
 }
 
 /* 排名徽章 */
@@ -439,14 +464,14 @@ onMounted(() => {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #E2E8F0;
-  color: #64748B;
+  background: var(--primitive-slate-200);
+  color: var(--color-text-secondary);
   font-weight: 700;
   font-size: 13px;
 }
-.rank-badge.rank-1 { background: linear-gradient(135deg, #FBBF24, #F59E0B); color: white; }
-.rank-badge.rank-2 { background: linear-gradient(135deg, #D1D5DB, #94A3B8); color: white; }
-.rank-badge.rank-3 { background: linear-gradient(135deg, #D97706, #B45309); color: white; }
+.rank-badge.rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; box-shadow: 0 2px 6px rgba(245, 158, 11, 0.35); }
+.rank-badge.rank-2 { background: linear-gradient(135deg, #e5e7eb, #94a3b8); color: white; box-shadow: 0 2px 6px rgba(148, 163, 184, 0.35); }
+.rank-badge.rank-3 { background: linear-gradient(135deg, #ea580c, #c2410c); color: white; box-shadow: 0 2px 6px rgba(194, 65, 12, 0.35); }
 
 /* 卡片样式覆盖 */
 .detail-card :deep(.el-card__body) {

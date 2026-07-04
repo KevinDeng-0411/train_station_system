@@ -4,6 +4,10 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
+// Design System tokens & shared utility styles
+import './assets/design-tokens.css'
+import './assets/shared-styles.css'
+
 // ECharts 按需引入
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'

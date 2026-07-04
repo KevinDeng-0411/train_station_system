@@ -2,7 +2,7 @@
   <div>
     <h2>站点管理</h2>
     <el-card>
-      <el-form :inline="true" style="margin-bottom: 15px;">
+      <el-form :inline="true" class="mb-sm">
         <el-form-item>
           <el-button type="success" @click="handleAdd">新增站点</el-button>
         </el-form-item>

@@ -1,0 +1,348 @@
+/**
+ * ============================================================================
+ * 火车站票务管理系统 · 设计系统 tokens
+ * 三层架构: Primitives → Semantic → Component
+ * 遵循 ui-ux-pro-max 规范，支持深色模式
+ * ============================================================================
+ */
+
+/* ============================================================
+ * 第一层：Primitive Tokens（原始值）
+ * ============================================================ */
+:root {
+  /* ── 主色系：青蓝色谱（主品牌色）────────────────── */
+  --primitive-cyan-50:  #ecfeff;
+  --primitive-cyan-100: #cffafe;
+  --primitive-cyan-200: #a5f3fc;
+  --primitive-cyan-300: #67e8f9;
+  --primitive-cyan-400: #22d3ee;
+  --primitive-cyan-500: #06b6d4;
+  --primitive-cyan-600: #0891b2;
+  --primitive-cyan-700: #0e7490;
+  --primitive-cyan-800: #155e75;
+  --primitive-cyan-900: #164e63;
+  --primitive-cyan-950: #083344;
+
+  /* ── 成功色 ─────────────────────────────── */
+  --primitive-emerald-50:  #ecfdf5;
+  --primitive-emerald-100: #d1fae5;
+  --primitive-emerald-400: #34d399;
+  --primitive-emerald-500: #10b981;
+  --primitive-emerald-600: #059669;
+
+  /* ── 警告色 ─────────────────────────────── */
+  --primitive-amber-400: #fbbf24;
+  --primitive-amber-500: #f59e0b;
+  --primitive-amber-600: #d97706;
+
+  /* ── 危险色 ─────────────────────────────── */
+  --primitive-red-400: #f87171;
+  --primitive-red-500: #ef4444;
+  --primitive-red-600: #dc2626;
+
+  /* ── 中性色：文字 ───────────────────────── */
+  --primitive-slate-50:  #f8fafc;
+  --primitive-slate-100: #f1f5f9;
+  --primitive-slate-200: #e2e8f0;
+  --primitive-slate-300: #cbd5e1;
+  --primitive-slate-400: #94a3b8;
+  --primitive-slate-500: #64748b;
+  --primitive-slate-600: #475569;
+  --primitive-slate-700: #334155;
+  --primitive-slate-800: #1e293b;
+  --primitive-slate-900: #0f172a;
+  --primitive-slate-950: #020617;
+
+  /* ── 间距基准网格（4px）────────────────── */
+  --primitive-space-1:  0.25rem;   /* 4px  */
+  --primitive-space-2:  0.5rem;    /* 8px  */
+  --primitive-space-3:  0.75rem;   /* 12px */
+  --primitive-space-4:  1rem;      /* 16px */
+  --primitive-space-5:  1.25rem;   /* 20px */
+  --primitive-space-6:  1.5rem;    /* 24px */
+  --primitive-space-8:  2rem;      /* 32px */
+  --primitive-space-10: 2.5rem;    /* 40px */
+  --primitive-space-12: 3rem;      /* 48px */
+  --primitive-space-16: 4rem;      /* 64px */
+
+  /* ── 圆角 ───────────────────────────────── */
+  --primitive-radius-sm:   0.25rem;  /* 4px  */
+  --primitive-radius-md:   0.5rem;   /* 8px  */
+  --primitive-radius-lg:   0.75rem;  /* 12px */
+  --primitive-radius-xl:   1rem;     /* 16px */
+  --primitive-radius-2xl:  1.5rem;   /* 24px */
+  --primitive-radius-full: 9999px;
+
+  /* ── 字体大小 ───────────────────────────── */
+  --primitive-font-size-xs:   0.6875rem;  /* 11px */
+  --primitive-font-size-sm:   0.75rem;    /* 12px */
+  --primitive-font-size-base: 0.8125rem;  /* 13px */
+  --primitive-font-size-md:   0.875rem;   /* 14px */
+  --primitive-font-size-lg:   1rem;       /* 16px */
+  --primitive-font-size-xl:   1.125rem;   /* 18px */
+  --primitive-font-size-2xl:  1.25rem;    /* 20px */
+  --primitive-font-size-3xl:  1.5rem;     /* 24px */
+  --primitive-font-size-4xl:  1.75rem;    /* 28px */
+
+  /* ── 阴影 ───────────────────────────────── */
+  --primitive-shadow-xs:  0 1px  2px  rgb(0 0 0 / 0.04);
+  --primitive-shadow-sm:  0 1px  3px  rgb(0 0 0 / 0.06);
+  --primitive-shadow-md:  0 4px  6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --primitive-shadow-lg:  0 8px  24px -4px rgb(0 0 0 / 0.10), 0 4px 8px -4px rgb(0 0 0 / 0.06);
+  --primitive-shadow-xl:  0 20px 40px -8px rgb(0 0 0 / 0.14), 0 8px 16px -6px rgb(0 0 0 / 0.08);
+
+  /* ── 动效时长 ───────────────────────────── */
+  --primitive-duration-fast:   150ms;
+  --primitive-duration-normal: 250ms;
+  --primitive-duration-slow:   400ms;
+
+  /* ── 动效缓动 ───────────────────────────── */
+  --primitive-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --primitive-ease-in:      cubic-bezier(0.4, 0, 1, 1);
+  --primitive-ease-out:     cubic-bezier(0, 0, 0.2, 1);
+  --primitive-ease-bounce:  cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
+/* ============================================================
+ * 第二层：Semantic Tokens（语义别名）
+ * ============================================================ */
+:root {
+  /* ── 主品牌色 ───────────────────────────── */
+  --color-primary:        var(--primitive-cyan-600);
+  --color-primary-light:  var(--primitive-cyan-500);
+  --color-primary-lighter:var(--primitive-cyan-400);
+  --color-primary-dark:   var(--primitive-cyan-700);
+  --color-primary-darker: var(--primitive-cyan-800);
+
+  /* ── 语义色 ─────────────────────────────── */
+  --color-success:        var(--primitive-emerald-500);
+  --color-success-light:  var(--primitive-emerald-400);
+  --color-success-bg:     var(--primitive-emerald-50);
+  --color-success-text:   var(--primitive-emerald-600);
+
+  --color-warning:        var(--primitive-amber-500);
+  --color-warning-light:  var(--primitive-amber-400);
+  --color-warning-bg:     #fffbeb;
+  --color-warning-text:   var(--primitive-amber-600);
+
+  --color-danger:         var(--primitive-red-500);
+  --color-danger-light:   var(--primitive-red-400);
+  --color-danger-bg:      #fef2f2;
+  --color-danger-text:    var(--primitive-red-600);
+
+  /* ── 文字色阶 ───────────────────────────── */
+  --color-text-primary:   var(--primitive-slate-900);
+  --color-text-secondary: var(--primitive-slate-600);
+  --color-text-muted:     var(--primitive-slate-400);
+  --color-text-disabled:  var(--primitive-slate-300);
+  --color-text-inverse:   #ffffff;
+
+  /* ── 背景色阶 ───────────────────────────── */
+  --color-bg-base:        var(--primitive-slate-50);
+  --color-bg-surface:     var(--primitive-cyan-50);
+  --color-bg-raised:      #ffffff;
+  --color-bg-overlay:     rgba(15, 23, 42, 0.5);
+
+  /* ── 玻璃态 ─────────────────────────────── */
+  --color-glass-bg:       rgba(255, 255, 255, 0.72);
+  --color-glass-border:   rgba(255, 255, 255, 0.5);
+  --color-glass-bg-deep:  rgba(255, 255, 255, 0.85);
+  --color-glass-shadow:   0 8px 32px rgba(8, 145, 178, 0.08);
+
+  /* ── 边框色 ─────────────────────────────── */
+  --color-border:         rgba(8, 145, 178, 0.12);
+  --color-border-strong:  rgba(8, 145, 178, 0.25);
+  --color-border-focus:   var(--primitive-cyan-500);
+
+  /* ── 间距语义 ───────────────────────────── */
+  --space-1:  var(--primitive-space-1);
+  --space-2:  var(--primitive-space-2);
+  --space-3:  var(--primitive-space-3);
+  --space-4:  var(--primitive-space-4);
+  --space-5:  var(--primitive-space-5);
+  --space-6:  var(--primitive-space-6);
+  --space-8:  var(--primitive-space-8);
+  --space-10: var(--primitive-space-10);
+  --space-12: var(--primitive-space-12);
+  --space-16: var(--primitive-space-16);
+
+  /* ── 圆角语义 ───────────────────────────── */
+  --radius-sm:   var(--primitive-radius-sm);
+  --radius-md:   var(--primitive-radius-md);
+  --radius-lg:   var(--primitive-radius-lg);
+  --radius-xl:   var(--primitive-radius-xl);
+  --radius-2xl:  var(--primitive-radius-2xl);
+  --radius-full: var(--primitive-radius-full);
+
+  /* ── 阴影语义 ───────────────────────────── */
+  --shadow-xs:      var(--primitive-shadow-xs);
+  --shadow-sm:      var(--primitive-shadow-sm);
+  --shadow-glass:   var(--primitive-shadow-lg);
+  --shadow-elevated:var(--primitive-shadow-xl);
+
+  /* ── 动效语义 ───────────────────────────── */
+  --duration-fast:   var(--primitive-duration-fast);
+  --duration-normal: var(--primitive-duration-normal);
+  --duration-slow:   var(--primitive-duration-slow);
+  --ease-default:    var(--primitive-ease-default);
+  --ease-in:         var(--primitive-ease-in);
+  --ease-out:        var(--primitive-ease-out);
+  --ease-bounce:     var(--primitive-ease-bounce);
+
+  /* ── 字体 ───────────────────────────────── */
+  --font-sans: 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', '苹方', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+
+  /* ── 字号 ───────────────────────────────── */
+  --text-xs:   var(--primitive-font-size-xs);
+  --text-sm:   var(--primitive-font-size-sm);
+  --text-base: var(--primitive-font-size-base);
+  --text-md:   var(--primitive-font-size-md);
+  --text-lg:   var(--primitive-font-size-lg);
+  --text-xl:   var(--primitive-font-size-xl);
+  --text-2xl:  var(--primitive-font-size-2xl);
+  --text-3xl:  var(--primitive-font-size-3xl);
+  --text-4xl:  var(--primitive-font-size-4xl);
+}
+
+
+/* ============================================================
+ * 第三层：Component Tokens（组件专用）
+ * ============================================================ */
+:root {
+  /* ── 按钮 ───────────────────────────────── */
+  --btn-primary-gradient: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  --btn-primary-shadow:   0 2px 8px rgba(8, 145, 178, 0.3);
+  --btn-primary-shadow-hover: 0 4px 16px rgba(8, 145, 178, 0.4);
+  --btn-primary-radius:   var(--radius-md);
+  --btn-padding-x:        var(--space-4);
+  --btn-padding-y:        var(--space-2);
+
+  --btn-success-gradient: linear-gradient(135deg, var(--primitive-emerald-500), var(--primitive-emerald-400));
+  --btn-danger-gradient:  linear-gradient(135deg, var(--primitive-red-500), var(--primitive-red-400));
+
+  /* ── 卡片 ───────────────────────────────── */
+  --card-bg:       var(--color-glass-bg-deep);
+  --card-border:   var(--color-glass-border);
+  --card-radius:   var(--radius-xl);
+  --card-padding:  var(--space-6);
+  --card-shadow:   var(--shadow-glass);
+  --card-shadow-hover: var(--shadow-elevated);
+
+  /* ── 表格 ───────────────────────────────── */
+  --table-header-bg:     rgba(8, 145, 178, 0.08);
+  --table-header-fg:     var(--color-primary-dark);
+  --table-row-bg:        rgba(255, 255, 255, 0.6);
+  --table-row-bg-hover:  rgba(8, 145, 178, 0.04);
+  --table-row-border:    rgba(8, 145, 178, 0.06);
+  --table-radius:        var(--radius-lg);
+
+  /* ── 对话框 ─────────────────────────────── */
+  --dialog-header-bg:  linear-gradient(135deg, var(--primitive-cyan-50), var(--primitive-cyan-100));
+  --dialog-header-fg:  var(--color-primary-dark);
+  --dialog-body-bg:    var(--color-glass-bg-deep);
+  --dialog-radius:     var(--radius-xl);
+  --dialog-padding:    var(--space-6);
+
+  /* ── 表单输入 ───────────────────────────── */
+  --input-bg:       rgba(255, 255, 255, 0.85);
+  --input-border:   rgba(8, 145, 178, 0.18);
+  --input-radius:   var(--radius-md);
+  --input-shadow-hover: 0 0 0 1px var(--color-primary-light) inset;
+  --input-shadow-focus: 0 0 0 2px var(--color-primary) inset;
+  --input-padding-x: var(--space-3);
+  --input-padding-y: var(--space-2);
+  --input-text-color: var(--color-text-primary);
+  --input-placeholder-color: var(--primitive-slate-500);
+
+  /* ── 标签 ───────────────────────────────── */
+  --tag-radius: var(--radius-sm);
+
+  /* ── 分页 ───────────────────────────────── */
+  --pagination-active-bg: var(--btn-primary-gradient);
+  --pagination-active-fg: var(--color-text-inverse);
+
+  /* ── 导航 ───────────────────────────────── */
+  --nav-bg:      var(--color-glass-bg);
+  --nav-border:  var(--color-glass-border);
+  --nav-shadow:  0 4px 24px rgba(8, 145, 178, 0.06);
+  --nav-active-bg: var(--btn-primary-gradient);
+  --nav-active-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+  --nav-link-radius: var(--radius-md);
+
+  /* ── KPI 卡 ─────────────────────────────── */
+  --kpi-accent-width: 4px;
+  --kpi-accent-color: var(--color-primary-lighter);
+
+  /* ── 图表卡 ─────────────────────────────── */
+  --chart-card-radius:  var(--radius-xl);
+  --chart-card-padding: var(--space-5);
+
+  /* ── 背景装饰球 ─────────────────────────── */
+  --blob-1-color: var(--primitive-cyan-400);
+  --blob-2-color: var(--primitive-cyan-300);
+  --blob-3-color: var(--primitive-cyan-200);
+  --blob-blur:    80px;
+  --blob-opacity: 0.4;
+}
+
+
+/* ============================================================
+ * 深色模式（data-theme="dark"）
+ * ============================================================ */
+[data-theme="dark"] {
+  /* ── 文字 ─────────────────────────────── */
+  --color-text-primary:   var(--primitive-slate-100);
+  --color-text-secondary: var(--primitive-slate-300);
+  --color-text-muted:     var(--primitive-slate-500);
+
+  /* ── 背景 ─────────────────────────────── */
+  --color-bg-base:        var(--primitive-slate-900);
+  --color-bg-surface:     var(--primitive-slate-800);
+  --color-bg-raised:      var(--primitive-slate-800);
+
+  /* ── 玻璃态 ─────────────────────────────── */
+  --color-glass-bg:       rgba(30, 41, 59, 0.80);
+  --color-glass-border:   rgba(71, 85, 105, 0.4);
+  --color-glass-bg-deep:  rgba(30, 41, 59, 0.92);
+
+  /* ── 边框 ─────────────────────────────── */
+  --color-border:         rgba(148, 163, 184, 0.12);
+  --color-border-strong:  rgba(148, 163, 184, 0.25);
+
+  /* ── 表格 ─────────────────────────────── */
+  --table-header-bg:     rgba(8, 145, 178, 0.15);
+  --table-row-bg:        rgba(30, 41, 59, 0.6);
+  --table-row-bg-hover:  rgba(8, 145, 178, 0.08);
+
+  /* ── 对话框 ─────────────────────────────── */
+  --dialog-header-bg:  linear-gradient(135deg, var(--primitive-slate-800), var(--primitive-slate-700));
+  --dialog-body-bg:    var(--color-glass-bg-deep);
+
+  /* ── 表单 ─────────────────────────────── */
+  --input-bg: rgba(30, 41, 59, 0.80);
+
+  /* ── 背景球颜色（深色模式下偏蓝灰）────── */
+  --blob-1-color: rgba(8, 145, 178, 0.35);
+  --blob-2-color: rgba(103, 232, 249, 0.20);
+  --blob-3-color: rgba(165, 243, 252, 0.15);
+}
+
+/* ============================================================
+ * 全局样式重置（使用 design tokens）
+ * ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

@@ -2,7 +2,7 @@
   <div>
     <h2>车次管理</h2>
     <el-card>
-      <el-form :inline="true" :model="searchForm" style="margin-bottom: 15px;">
+      <el-form :inline="true" :model="searchForm" class="mb-sm">
         <el-form-item label="关键词">
           <el-input v-model="searchForm.keyword" placeholder="车次号/城市" clearable />
         </el-form-item>
@@ -17,15 +17,15 @@
         <el-table-column prop="trainNumber" label="车次号" width="120" />
         <el-table-column label="出发站→到达站" min-width="260">
           <template #default="{ row }">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <div style="text-align: right; flex: 1;">
-                <div style="font-weight: 600; color: #0F172A;">{{ row.departureStationName || row.departureCity }}</div>
-                <div style="font-size: 11px; color: #94A3B8;">{{ row.departureCity }}</div>
+            <div class="route-cell">
+              <div class="route-cell-side">
+                <div class="route-city-name">{{ row.departureStationName || row.departureCity }}</div>
+                <div class="station-sub">{{ row.departureCity }}</div>
               </div>
-              <span style="color: #0891B2; font-weight: 700; font-size: 18px;">→</span>
-              <div style="flex: 1;">
-                <div style="font-weight: 600; color: #0F172A;">{{ row.arrivalStationName || row.arrivalCity }}</div>
-                <div style="font-size: 11px; color: #94A3B8;">{{ row.arrivalCity }}</div>
+              <span class="route-arrow">→</span>
+              <div class="route-cell-side">
+                <div class="route-city-name">{{ row.arrivalStationName || row.arrivalCity }}</div>
+                <div class="station-sub">{{ row.arrivalCity }}</div>
               </div>
             </div>
           </template>
@@ -63,7 +63,7 @@
         layout="total, sizes, prev, pager, next"
         @size-change="loadData"
         @current-change="loadData"
-        style="margin-top: 15px;"
+        class="mt-sm"
       />
     </el-card>
 
@@ -74,12 +74,12 @@
           <el-input v-model="form.trainNumber" :disabled="!!form.id" />
         </el-form-item>
         <el-form-item label="出发站点" prop="departureStationId" v-if="!form.id">
-          <el-select v-model="form.departureStationId" placeholder="请选择出发站（关联train_stations）" filterable style="width: 100%">
+          <el-select v-model="form.departureStationId" placeholder="请选择出发站（关联train_stations）" filterable class="w-full">
             <el-option v-for="s in stationList" :key="s.id" :label="`${s.stationName}（${s.city}）`" :value="s.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="到达站点" prop="arrivalStationId" v-if="!form.id">
-          <el-select v-model="form.arrivalStationId" placeholder="请选择到达站（关联train_stations）" filterable style="width: 100%">
+          <el-select v-model="form.arrivalStationId" placeholder="请选择到达站（关联train_stations）" filterable class="w-full">
             <el-option v-for="s in stationList" :key="s.id" :label="`${s.stationName}（${s.city}）`" :value="s.id" :disabled="s.id === form.departureStationId" />
           </el-select>
         </el-form-item>
@@ -93,7 +93,7 @@
           <el-input-number v-model="form.totalSeats" :min="1" :max="2000" />
         </el-form-item>
         <el-form-item label="发车时间" prop="departureTime">
-          <el-time-picker v-model="form.departureTime" format="HH:mm:ss" value-format="HH:mm:ss" style="width: 100%;" />
+          <el-time-picker v-model="form.departureTime" format="HH:mm:ss" value-format="HH:mm:ss" class="w-full" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="form.status">
@@ -252,3 +252,20 @@ const handleSubmit = async () => {
 
 onMounted(() => { loadData(); loadStations() })
 </script>
+
+<style scoped>
+/* 路线单元格（出发→到达） */
+.route-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.route-cell-side {
+  text-align: right;
+  flex: 1;
+}
+.route-city-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+</style>

@@ -31,11 +31,44 @@ public class StatisticsController {
         return result;
     }
 
+    @GetMapping("/trains/{trainNumber}/range")
+    public Map<String, Object> getTrainSalesByRange(
+            @PathVariable String trainNumber,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            List<Map<String, Object>> data = statisticsService.getTrainSalesByRange(trainNumber, startDate, endDate);
+            result.put("success", true);
+            result.put("data", data);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
     @GetMapping("/salespeople/date/{date}")
     public Map<String, Object> getSalespersonRevenue(@PathVariable String date) {
         Map<String, Object> result = new HashMap<>();
         try {
             List<Map<String, Object>> data = statisticsService.getSalespersonRevenue(date);
+            result.put("success", true);
+            result.put("data", data);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
+    @GetMapping("/salespeople/range")
+    public Map<String, Object> getSalespersonRevenueByRange(
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            List<Map<String, Object>> data = statisticsService.getSalespersonRevenueByRange(startDate, endDate);
             result.put("success", true);
             result.put("data", data);
         } catch (Exception e) {
