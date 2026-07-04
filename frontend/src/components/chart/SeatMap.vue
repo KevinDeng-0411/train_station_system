@@ -109,54 +109,59 @@ function selectSeat(row, col) {
 
 <style scoped>
 .seat-map {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(8, 145, 178, 0.1);
-  border-radius: 12px;
-  padding: 16px;
+  background: var(--color-glass-bg-deep);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  backdrop-filter: blur(10px);
 }
 .seat-legend {
   display: flex;
-  gap: 20px;
-  margin-bottom: 16px;
+  gap: var(--space-5);
+  margin-bottom: var(--space-4);
   justify-content: center;
 }
 .legend-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: #475569;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
 }
 .dot {
   display: inline-block;
   width: 14px;
   height: 14px;
   border-radius: 3px;
+  transition: transform var(--duration-fast) var(--ease-default);
 }
-.dot.free { background: #E0F2FE; border: 1px solid #BAE6FD; }
-.dot.sold { background: #F1F5F9; border: 1px solid #CBD5E1; cursor: not-allowed; opacity: 0.5; }
-.dot.selected { background: #06B6D4; border: 1px solid #0891B2; }
+.legend-item:hover .dot { transform: scale(1.15); }
+.dot.free { background: var(--primitive-cyan-100); border: 1px solid var(--primitive-cyan-200); }
+.dot.sold { background: var(--primitive-slate-100); border: 1px solid var(--primitive-slate-300); opacity: 0.5; }
+.dot.selected { background: var(--color-primary); border: 1px solid var(--color-primary-dark); }
 
 .seat-grid {
   display: grid;
   grid-template-columns: 32px repeat(5, 42px);
   gap: 4px;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }
 .row-header, .col-header {
   text-align: center;
-  font-size: 11px;
-  color: #94A3B8;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
   font-weight: 600;
   align-self: center;
+  font-family: var(--font-mono);
 }
 .row-num {
   text-align: center;
-  font-size: 12px;
-  color: #64748B;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
   font-weight: 600;
   align-self: center;
+  font-family: var(--font-mono);
 }
 .seat {
   width: 38px;
@@ -164,54 +169,88 @@ function selectSeat(row, col) {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  font-size: 11px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s;
-  background: #E0F2FE;
-  color: #0891B2;
+  transition: all var(--duration-fast) var(--ease-bounce);
+  background: var(--primitive-cyan-100);
+  color: var(--color-primary);
   border: 2px solid transparent;
+  position: relative;
+  user-select: none;
 }
-.seat:hover { background: #BAE6FD; }
+.seat:hover {
+  background: var(--primitive-cyan-200);
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.25);
+  z-index: 1;
+}
+.seat:active { transform: scale(0.96); }
 /* 窗边座位 */
-.seat.window-left { border-left: 3px solid #06B6D4; }
-.seat.window-right { border-right: 3px solid #06B6D4; }
+.seat.window-left { border-left: 3px solid var(--color-primary-light); }
+.seat.window-right { border-right: 3px solid var(--color-primary-light); }
 /* 过道座位 */
 .seat.aisle-left { margin-right: 12px; }
 .seat.aisle-right { margin-left: 12px; }
-/* 已售：灰色 */
-.seat:has(.sold) { display: none; }
-/* 需用JS处理 - 使用内联style */
 .seat.sold-override {
-  background: #F1F5F9;
-  color: #CBD5E1;
+  background: var(--primitive-slate-100);
+  color: var(--primitive-slate-300);
   cursor: not-allowed;
-  border-color: #E2E8F0;
+  border-color: var(--primitive-slate-200);
+  opacity: 0.6;
+  transform: none;
 }
-/* 已选 */
+.seat.sold-override:hover {
+  background: var(--primitive-slate-100);
+  transform: none;
+  box-shadow: none;
+}
 .seat.selected-override {
-  background: #06B6D4;
+  background: var(--color-primary);
   color: white;
-  border-color: #0891B2;
-  box-shadow: 0 2px 8px rgba(8, 145, 178, 0.3);
+  border-color: var(--color-primary-dark);
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.4);
+  transform: scale(1.05);
+  animation: seatPulse 1.5s var(--ease-default) infinite;
+}
+@keyframes seatPulse {
+  0%, 100% { box-shadow: 0 4px 12px rgba(8, 145, 178, 0.4); }
+  50% { box-shadow: 0 4px 20px rgba(8, 145, 178, 0.7); }
 }
 .empty {
   text-align: center;
-  padding: 40px;
-  color: #94A3B8;
-  font-size: 14px;
+  padding: var(--space-10);
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
 }
 .hint {
-  margin: 12px 0 0;
-  font-size: 12px;
-  color: #64748B;
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
   text-align: center;
 }
 .hint code {
-  background: #E0F2FE;
-  color: #0891B2;
+  background: var(--primitive-cyan-50);
+  color: var(--color-primary);
   padding: 1px 6px;
   border-radius: 3px;
+  font-family: var(--font-mono);
+}
+
+/* 深色模式 */
+[data-theme="dark"] .seat {
+  background: rgba(8, 145, 178, 0.2);
+  color: var(--primitive-cyan-200);
+}
+[data-theme="dark"] .seat:hover {
+  background: rgba(8, 145, 178, 0.35);
+}
+[data-theme="dark"] .seat.sold-override {
+  background: rgba(71, 85, 105, 0.3);
+  color: var(--primitive-slate-500);
+}
+[data-theme="dark"] .seat-map {
+  background: rgba(30, 41, 59, 0.85);
 }
 </style>

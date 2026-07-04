@@ -130,3 +130,40 @@ code {
 [data-theme="dark"] .station-sub {
   color: var(--color-text-muted);
 }
+
+/* ── 数字滚动动画（KPI 卡）────────────────────────────── */
+@keyframes countUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+.kpi-value .number {
+  display: inline-block;
+  animation: countUp var(--duration-slow) var(--ease-bounce);
+  font-variant-numeric: tabular-nums;  /* 等宽数字 */
+}
+
+/* ── 玻璃态统计行 hover 提升 ───────────────────────── */
+.kpi-card {
+  position: relative;
+  cursor: default;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+  background: linear-gradient(135deg, transparent, rgba(8, 145, 178, 0.04));
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-default);
+  pointer-events: none;
+}
+.kpi-card:hover::after { opacity: 1; }
+
+/* ── 表格行 hover 微动画 ─────────────────────────────── */
+.el-table tr {
+  transition: background var(--duration-fast) var(--ease-default),
+              transform var(--duration-fast) var(--ease-default) !important;
+}
+.el-table tr:hover {
+  transform: translateX(2px);
+}
