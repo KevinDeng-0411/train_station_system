@@ -34,8 +34,8 @@ public class StatisticsController {
     @GetMapping("/trains/{trainNumber}/range")
     public Map<String, Object> getTrainSalesByRange(
             @PathVariable String trainNumber,
-            @RequestParam String startDate,
-            @RequestParam String endDate) {
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
         Map<String, Object> result = new HashMap<>();
         try {
             List<Map<String, Object>> data = statisticsService.getTrainSalesByRange(trainNumber, startDate, endDate);
@@ -64,8 +64,8 @@ public class StatisticsController {
 
     @GetMapping("/salespeople/range")
     public Map<String, Object> getSalespersonRevenueByRange(
-            @RequestParam String startDate,
-            @RequestParam String endDate) {
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
         Map<String, Object> result = new HashMap<>();
         try {
             List<Map<String, Object>> data = statisticsService.getSalespersonRevenueByRange(startDate, endDate);

@@ -49,11 +49,14 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<Map<String, Object>> getTrainSalesByRange(String trainNumber, String startDate, String endDate) {
+        // 默认显示全部数据
+        String start = (startDate == null || startDate.isEmpty()) ? "1970-01-01" : startDate;
+        String end = (endDate == null || endDate.isEmpty()) ? "2999-12-31" : endDate;
         String sql = "CALL sp_train_sales_by_range(?, ?, ?)";
         CallableStatementCallback<List<Map<String, Object>>> callback = cs -> {
             cs.setString(1, trainNumber);
-            cs.setString(2, startDate);
-            cs.setString(3, endDate);
+            cs.setString(2, start);
+            cs.setString(3, end);
             boolean hasResultSet = cs.execute();
             if (hasResultSet) {
                 return resultSetToList(cs.getResultSet());
@@ -65,10 +68,13 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<Map<String, Object>> getSalespersonRevenueByRange(String startDate, String endDate) {
+        // 默认显示全部数据
+        String start = (startDate == null || startDate.isEmpty()) ? "1970-01-01" : startDate;
+        String end = (endDate == null || endDate.isEmpty()) ? "2999-12-31" : endDate;
         String sql = "CALL sp_salesperson_revenue_by_range(?, ?)";
         CallableStatementCallback<List<Map<String, Object>>> callback = cs -> {
-            cs.setString(1, startDate);
-            cs.setString(2, endDate);
+            cs.setString(1, start);
+            cs.setString(2, end);
             boolean hasResultSet = cs.execute();
             if (hasResultSet) {
                 return resultSetToList(cs.getResultSet());

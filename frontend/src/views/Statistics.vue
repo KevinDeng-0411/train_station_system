@@ -255,12 +255,27 @@ const kpiCards = computed(() => [
 ])
 
 // 加载所有数据
+const fmtDate = (d) => {
+  const date = typeof d === 'string' ? new Date(d) : d
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+// 获取当前有效的日期范围字符串（无 dateRange 时默认最近 7 天）
+const getDateRange = () => {
+  if (form.dateRange && form.dateRange.length === 2) {
+    return { start: fmtDate(form.dateRange[0]), end: fmtDate(form.dateRange[1]) }
+  }
+  const end = new Date()
+  const start = new Date()
+  start.setDate(start.getDate() - 6)
+  return { start: fmtDate(start), end: fmtDate(end) }
+}
+
 const loadAllData = async () => {
   loading.value = true
   try {
-    // 提取日期范围参数
-    const startDate = form.dateRange && form.dateRange[0] ? form.dateRange[0] : null
-    const endDate = form.dateRange && form.dateRange[1] ? form.dateRange[1] : null
+    const { start, end } = getDateRange()
 
     // KPI（始终是"今日"，不跟日期）
     const kpiRes = await statisticsApi.getKpi()
@@ -273,19 +288,19 @@ const loadAllData = async () => {
     }
 
     // 车次TOP（按日期范围筛选）
-    const trainTopRes = await statisticsApi.getTrainTop(10, startDate, endDate)
+    const trainTopRes = await statisticsApi.getTrainTop(10, start, end)
     if (trainTopRes.data.success) {
       trainTopData.value = trainTopRes.data.data
     }
 
     // 站点热门（按日期范围筛选）
-    const stationRes = await statisticsApi.getStationPopular('departure', 8, startDate, endDate)
+    const stationRes = await statisticsApi.getStationPopular('departure', 8, start, end)
     if (stationRes.data.success) {
       stationPopularData.value = stationRes.data.data
     }
 
     // 业务员销售（按日期范围）
-    const salespersonRes = await statisticsApi.getSalespersonRevenueByRange(startDate, endDate)
+    const salespersonRes = await statisticsApi.getSalespersonRevenueByRange(start, end)
     if (salespersonRes.data.success) {
       salespersonStats.value = salespersonRes.data.data
     }
@@ -302,26 +317,8 @@ const loadAllData = async () => {
 const loadTrainSales = async () => {
   trainLoading.value = true
   try {
-    // 使用日期范围（如果用户已选）或默认最近 7 天
-    let startDate, endDate
-    if (form.dateRange && form.dateRange.length === 2) {
-      startDate = form.dateRange[0]
-      endDate = form.dateRange[1]
-    } else {
-      const end = new Date()
-      const start = new Date()
-      start.setDate(start.getDate() - 6)
-      startDate = start
-      endDate = end
-    }
-    const fmt = (d) => {
-      const date = typeof d === 'string' ? new Date(d) : d
-      const pad = (n) => String(n).padStart(2, '0')
-      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-    }
-    const res = await statisticsApi.getTrainSalesByRange(
-      form.trainNumber, fmt(startDate), fmt(endDate)
-    )
+    const { start, end } = getDateRange()
+    const res = await statisticsApi.getTrainSalesByRange(form.trainNumber, start, end)
     if (res.data.success) trainStats.value = res.data.data
     else trainStats.value = []
   } catch (e) {
