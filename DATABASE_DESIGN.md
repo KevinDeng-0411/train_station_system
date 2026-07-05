@@ -36,7 +36,7 @@
 | 存储引擎 | InnoDB（支持事务、外键） |
 | 表数量 | 7张业务表 |
 | 触发器数量 | 2个 |
-| 存储过程数量 | 3个 |
+| 存储过程数量 | 5个（3 个单日统计 + 2 个日期范围统计）|
 
 ---
 
@@ -268,6 +268,42 @@ backup_records(<u>id</u>, backup_file, backup_path, backup_size,
 | **冗余存储（采用）** | **可追溯历史金额** | **占用少量空间** |
 
 **理由**：退票金额随时间可能变化（开车前/后），需要记录实际退票金额，保证财务可追溯。
+
+---
+
+### 4.4 字段类型选择说明
+
+下表对关键字段的数据类型与长度选择给出简要理由，便于评审理解设计权衡。
+
+| 字段 | 类型 | 选择理由 |
+|------|------|----------|
+| `station_name` | `VARCHAR(50)` | 中文站名最长约 6 个汉字（≤ 18 字节），预留 50 字符可容纳"XX 站"、"XX 站北广场"等完整表达 |
+| `city` | `VARCHAR(50)` | 城市名最长 5 字（如"内蒙古自治区"），50 字符足够且符合中文字符存储 |
+| `train_number` | `VARCHAR(20)` | 车次号格式如"G101"、"D2502"、"Z99"等，4-6 字符足够；20 字符预留"复兴号 CR400AF"等业务扩展 |
+| `departure_time` / `arrival_time` | `TIME` | MySQL 原生 TIME 类型占 3 字节，比 VARCHAR 节省空间且支持时间运算 |
+| `total_seats` / `remaining_seats` | `INT` | 座位数最多数千，INT 范围 ±21 亿远超业务上限；`TINYINT`（-128~127）不足 |
+| `status` | `TINYINT` | 业务状态值有限（0/1），TINYINT 1 字节足够且语义清晰 |
+| `price` | `DECIMAL(10,2)` | 票价最多 99999999.99 元，2 位小数精确到分；**禁用 FLOAT/DOUBLE**（浮点精度丢失，财务字段大忌） |
+| `employee_code` | `VARCHAR(20)` | 工号格式如"EMP001"或"2024-XJ-001"，20 字符足够 |
+| `name` | `VARCHAR(50)` | 人名最长约 6 字（少数复姓如"欧阳娜娜"）+ 预留扩展 |
+| `phone` | `VARCHAR(20)` | 中国手机号 11 位，国际号码 +86 加区号最多 17 位，20 字符覆盖 |
+| `id_card` | `VARCHAR(18)` | 中国身份证固定 18 位（含校验位）；预留为后续港澳台证件扩展 |
+| `seat_number` | `VARCHAR(10)` | 高铁座位号如"1A"、卧铺"03车12号下"，10 字符足够 |
+| `passenger_id_card` | `VARCHAR(18)` | 同 `id_card` 字段，业务完全一致 |
+| `sale_date` | `DATE` | 仅需记录乘车日期（年月日），比 DATETIME 节省一半存储 |
+| `sale_time` / `refund_time` / `created_at` / `updated_at` | `TIMESTAMP` | 精确到秒，4 字节，范围 1970-2038；如需更长时间可用 `DATETIME`（8 字节，1000-9999） |
+| `refund_amount` | `DECIMAL(10,2)` | 与 `price` 一致，财务字段必须 DECIMAL |
+| `reason` | `VARCHAR(200)` | 退票原因 50-100 字常见，200 字符足够（无超长说明需求）|
+| `backup_file` / `backup_path` | `VARCHAR(255)` / `VARCHAR(500)` | 文件名 Linux 限制 255 字符；路径含时间戳子目录，500 字符足够 |
+| `backup_size` | `BIGINT` | 单文件大小最大 2^63 字节（远超磁盘容量），BIGINT 8 字节足够 |
+| `error_message` | `TEXT` | 错误信息可能较长（如堆栈），TEXT 支持 64KB |
+
+**通用原则**：
+
+1. **CHAR vs VARCHAR**：本系统全部使用 VARCHAR，因中文字段长度变化大（"北京" 2 字节 vs "内蒙古" 3 字节×3），CHAR 末尾补空格反浪费
+2. **VARCHAR(N) 中 N 的含义**：N 表示**字符数**（不是字节数），utf8mb4 下一个字符占 1-4 字节
+3. **DECIMAL vs FLOAT**：财务相关字段一律 DECIMAL，避免浮点累积误差
+4. **TIMESTAMP vs DATETIME**：当前需求 2038 年前够用故 TIMESTAMP；如设计未来系统建议直接 DATETIME
 
 ---
 
@@ -528,6 +564,62 @@ END
 
 ---
 
+#### 存储过程4：车次售票统计（日期范围版）⭐
+
+**名称**：`sp_train_sales_by_range(p_train_number, p_start_date, p_end_date)`
+
+**功能**：统计指定车次在指定日期范围内的售票明细。用于统计报表的"车次售票明细"卡片。
+
+**典型用法**：
+```sql
+-- 默认调用（空参数 = 全部数据）
+CALL sp_train_sales_by_range('G101', '1970-01-01', '2999-12-31');
+
+-- 最近 7 天
+CALL sp_train_sales_by_range('G101', '2026-07-01', '2026-07-07');
+```
+
+**返回字段**：
+| 字段 | 说明 |
+|------|------|
+| train_number | 车次号 |
+| departure_station | 出发站名 |
+| arrival_station | 到达站名 |
+| ticket_count | 区间售票数 |
+| total_amount | 区间累计金额 |
+| remaining_seats | 剩余座位数 |
+
+---
+
+#### 存储过程5：业务员收入统计（日期范围版）⭐
+
+**名称**：`sp_salesperson_revenue_by_range(p_start_date, p_end_date)`
+
+**功能**：统计指定日期范围内各业务员的销售业绩。用于统计报表的"业务员收入占比"饼图和"业务员收入排行"表。
+
+**典型用法**：
+```sql
+-- 默认调用
+CALL sp_salesperson_revenue_by_range('1970-01-01', '2999-12-31');
+
+-- 最近 7 天
+CALL sp_salesperson_revenue_by_range('2026-07-01', '2026-07-07');
+```
+
+**返回字段**：
+| 字段 | 说明 |
+|------|------|
+| employee_code | 业务员工号 |
+| salesperson_name | 姓名 |
+| ticket_count | 售票数 |
+| total_revenue | 销售总收入 |
+
+**设计要点**：
+- 空参数自动转换为 `1970-01-01` ~ `2999-12-31`（全范围），保证前端不传日期时也能显示数据
+- LEFT JOIN salespeople 保证所有在职业务员都出现（即使无业绩）
+
+---
+
 ## 七、数据完整性约束
 
 ### 7.1 实体完整性
@@ -597,10 +689,12 @@ SPRING_DATASOURCE_PASSWORD: root123456
 ### 9.1 初始化顺序
 
 ```bash
-01-schema.sql       # 创建数据库和表结构
-02-triggers.sql     # 创建触发器
-03-procedures.sql   # 创建存储过程
-04-sample-data.sql  # 插入示例数据
+01-schema.sql                    # 创建数据库和表结构
+02-triggers.sql                  # 创建触发器
+03-procedures.sql                # 创建存储过程（单日统计）
+04-sample-data.sql               # 插入示例数据
+05-performance-indexes.sql       # P0/P1 性能优化索引
+06-stats-range-procedures.sql    # 日期范围统计存储过程
 ```
 
 通过Docker的 `/docker-entrypoint-initdb.d` 目录自动按字母顺序执行。
@@ -620,9 +714,11 @@ SPRING_DATASOURCE_PASSWORD: root123456
 1. **严格的3NF规范**：7张表全部满足第三范式，消除了数据冗余和更新异常
 2. **触发器自动化**：售票前业务规则检查、退票后座位恢复均自动完成
 3. **存储过程封装**：复杂统计查询在数据库层完成，减轻应用负担
-4. **完善的索引**：高频查询字段均有索引支撑
+4. **完善的索引**：30 个索引（基础约束 + P0/P1 性能优化）
 5. **清晰的ER关系**：7张表覆盖票务系统的完整业务
 6. **可追溯性**：退票金额、备份历史均有完整记录
+7. **设计系统驱动 UI**（前端）：ui-ux-pro-max 三层 Token 架构 + 深色模式
+8. **日期范围统计**：5 个存储过程覆盖单日 + 范围场景
 
 ### 10.2 表数量与业务对应
 
@@ -649,10 +745,16 @@ SPRING_DATASOURCE_PASSWORD: root123456
 ---
 
 **附录**：
-- [完整SQL脚本](mysql/init/01-schema.sql)
-- [触发器脚本](mysql/init/02-triggers.sql)
-- [存储过程脚本](mysql/init/03-procedures.sql)
+- [完整SQL脚本](mysql/init/01-schema.sql) - 数据库表结构
+- [触发器脚本](mysql/init/02-triggers.sql) - 业务规则自动化
+- [存储过程脚本](mysql/init/03-procedures.sql) - 单日统计
 - [示例数据](mysql/init/04-sample-data.sql)
+- [性能索引脚本](mysql/init/05-performance-indexes.sql) - P0/P1 索引
+- [日期范围统计](mysql/init/06-stats-range-procedures.sql) - 仪表盘支持
+
+**前端设计系统**：
+- `frontend/src/assets/design-tokens.css` - 设计 Token（3 层架构）
+- `frontend/src/assets/shared-styles.css` - 工具类与动画
 
 ---
 
